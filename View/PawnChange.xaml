@@ -12,6 +12,7 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="Image_Click">
             <Image></Image>
