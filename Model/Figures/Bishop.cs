@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
     class Bishop : Figure
     {
         public Bishop(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? @"..\..\Images\wbishop.png" : @"..\..\Images\bbishop.png", color) { }
+            : base(position, color == FigureColor.White ? ImagePaths.WhiteBishop : ImagePaths.BlackBishop, color) { }
 
         public override List<Position> GetPossibleMoves()
         {

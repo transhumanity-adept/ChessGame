@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
     class Rook : Figure
     {
         public Rook(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? @"C:\Users\79107\Desktop\ChessGame\Images\wrook.png" : @"C:\Users\79107\Desktop\ChessGame\Images\brook.png", color) 
+            : base(position, color == FigureColor.White ? ImagePaths.WhiteRook : ImagePaths.BlackRook, color) 
         {
             MovementsState = MovementsState.Zero;
         }

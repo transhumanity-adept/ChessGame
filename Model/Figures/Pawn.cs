@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
@@ -10,7 +11,7 @@ namespace ChessGame.Model.Figures
         public bool HasEnPassant { get; set; }
         public int EnPassantNumberMove { get; set; }
         public Pawn(Position position, FigureColor color) 
-            : base(position, color == FigureColor.White ? @"..\..\Images\wpawn.png" : @"..\..\Images\bpawn.png", color)
+            : base(position, color == FigureColor.White ? ImagePaths.WhitePawn : ImagePaths.BlackPawn, color)
         {
             MovementsState = MovementsState.Zero;
         }

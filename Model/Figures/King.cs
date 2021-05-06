@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
     class King : Figure
     {
         public King(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? @"..\..\Images\wking.png" : @"..\..\Images\bking.png", color) 
+            : base(position, color == FigureColor.White ? ImagePaths.WhiteKing : ImagePaths.BlackKing, color) 
         {
             MovementsState = MovementsState.Zero;
         }

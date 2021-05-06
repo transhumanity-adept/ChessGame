@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
     class Queen : Figure
     {
         public Queen(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? @"C:\Users\79107\Desktop\ChessGame\Images\wqueen.png" : @"C:\Users\79107\Desktop\ChessGame\Images\bqueen.png", color) { }
+            : base(position, color == FigureColor.White ? ImagePaths.WhiteQueen : ImagePaths.BlackQueen, color) { }
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();

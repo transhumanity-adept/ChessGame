@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ChessGame.View
 {
@@ -19,9 +8,32 @@ namespace ChessGame.View
     /// </summary>
     public partial class PawnChange : Window
     {
+        public ChangeResult ChangeResult { get; private set; }
         public PawnChange()
         {
             InitializeComponent();
         }
+
+        public PawnChange(bool is_white) : this()
+        {
+            Image queen_image = button_queen.Content as Image;
+            if (is_white)
+            {
+
+            }
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+    }
+
+    public enum ChangeResult
+    {
+        Queen,
+        Bishop,
+        Knight,
+        Rook
     }
 }

@@ -12,18 +12,17 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="Image_Click">
+        <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="button_Click">
             <Image></Image>
         </Button>
-        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="Image_Click">
+        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="button_Click">
             <Image></Image>
         </Button>
-        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="Image_Click">
+        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="button_Click">
             <Image></Image>
         </Button>
-        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="Image_Click">
+        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="button_Click">
             <Image></Image>
         </Button>
     </Grid>
