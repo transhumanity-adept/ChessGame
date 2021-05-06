@@ -1,0 +1,29 @@
+﻿<Window x:Class="ChessGame.View.PawnChange"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChessGame.View"
+        mc:Ignorable="d"
+        Title="PawnChange" Height="300" Width="76" WindowStyle="None" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <!--<Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="Image_Click">
+            <Image></Image>
+        </Button>
+        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="Image_Click">
+            <Image Source="D:\Projects C#\TestChess\Images\wbishop.png"></Image>
+        </Button>
+        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="Image_Click">
+            <Image Source="D:\Projects C#\TestChess\Images\wknight.png"></Image>
+        </Button>
+        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="Image_Click">
+            <Image Source="D:\Projects C#\TestChess\Images\wrook.png"></Image>
+        </Button>-->
+    </Grid>
+</Window>

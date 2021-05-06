@@ -1,0 +1,81 @@
+﻿<Window x:Class="ChessGame.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:chess ="clr-namespace:ChessGame" 
+        xmlns:chess_vm_converters ="clr-namespace:ChessGame.ViewModel.Converters" 
+        xmlns:chess_vm ="clr-namespace:ChessGame.ViewModel"
+        mc:Ignorable="d"        
+        Title="MainWindow" Height="700" Width="700"
+        d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
+        <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
+        <chess_vm_converters:BackgroundCellConverter x:Key="background_converter"/>
+        <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="background_figure_converter"/>
+        <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
+    </Window.Resources>
+    <Window.DataContext>
+        <chess_vm:ChessViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>
+        <ItemsControl ItemsSource="{Binding Board}" Width="608" Height="608" Grid.Column="1"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button
+                        Command="{Binding DataContext.CellClickCommand,
+                            RelativeSource={RelativeSource Mode=FindAncestor,
+                            AncestorType=Window}}"
+                            CommandParameter="{Binding}" Width="76">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Content" Value="{Binding Position}"/>
+                                <Setter Property="Background" Value="{Binding Color, Converter={StaticResource color_converter}}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Active}" Value="true">
+                                        <Setter Property="Background" Value="Red"/>
+                                    </DataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsPossible}" Value="true"/>
+                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="true"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_converter}}"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsPossible}" Value="true"/>
+                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_figure_converter}}"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Image Source="{Binding Path=Figure.ImagePath, Converter={StaticResource image_path_converter}}"/>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="8" Rows="8"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </Grid>
+</Window>
