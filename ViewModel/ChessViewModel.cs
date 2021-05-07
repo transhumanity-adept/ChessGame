@@ -11,10 +11,29 @@ using System.Windows;
 
 namespace ChessGame.ViewModel
 {
+    public class CellClickedEventArgs
+    {
+        public Cell ClickedCell { get; private set; }
+        public CellClickedEventArgs(Cell clicked_cell) => ClickedCell = clicked_cell;
+    }
+
+    public class ResultOfPawnChangeObtainedEventArgs
+    {
+        public Position FigurePosition { get; private set; }
+        public FigureColor FigureColor { get; private set; }
+        public ChangeResult ChangeResult { get; private set; }
+        public ResultOfPawnChangeObtainedEventArgs(Position position, FigureColor color, ChangeResult result)
+            => (FigurePosition, FigureColor, ChangeResult) = (position, color, result);
+    }
     class ChessViewModel : NotifyPropertyChanged
     {
         private Board _board;
         private ICommand _cell_click_command;
+        public delegate void ClickedCellHandled(object sender, CellClickedEventArgs e);
+        public event ClickedCellHandled ClickedOnCell;
+        public delegate void ResultOfPawnChangeObtainedHandler(object sender, ResultOfPawnChangeObtainedEventArgs e);
+        public event ResultOfPawnChangeObtainedHandler ResultOfPawnChangeObtained;
+
         public Board Board
         {
             get => _board;
@@ -28,113 +47,12 @@ namespace ChessGame.ViewModel
         public ICommand CellClickCommand => _cell_click_command ?? (_cell_click_command = new RelayCommand(obj =>
         {
             Cell clicked_cell = (Cell)obj;
-            if (_board.FirstOrDefault(c => c.Active) is null)
-            {
-                clicked_cell.Active = true;
-                if (clicked_cell.Figure != null)
-                {
-                    Figure figure = clicked_cell.Figure;
-                    _board.AddPossibleMoves(_board.GetFiltredPossiblePositions(figure));
-                }
-            }
-            else
-            {
-                // Выбранная ячейка является активной
-                if (clicked_cell == _board.FirstOrDefault(c => c.Active))
-                {
-                    clicked_cell.Active = false;
-                    _board.ResetPossibleMoves();
-                }
-                else
-                {
-                    Cell active_cell = _board.FirstOrDefault(c => c.Active);
-                    active_cell.Active = false;
-                    _board.ResetPossibleMoves();
-
-                    if (clicked_cell.Figure != null)
-                    {
-                        if (active_cell.Figure == null)
-                        {
-                            clicked_cell.Active = true;
-                            List<Position> possible_moves = _board.GetFiltredPossiblePositions(clicked_cell.Figure);
-                            _board.AddPossibleMoves(possible_moves);
-                        }
-                        else
-                        {
-                            List<Position> possible_moves_active = _board.GetFiltredPossiblePositions(active_cell.Figure);
-                            if (possible_moves_active.Contains(clicked_cell.Position))
-                            {
-                                active_cell.Figure.AttackTo(clicked_cell.Position);
-                            }
-                            else
-                            {
-                                _board.ResetPossibleMoves();
-                                clicked_cell.Active = true;
-                                List<Position> possible_moves_clicked = _board.GetFiltredPossiblePositions(clicked_cell.Figure);
-                                _board.AddPossibleMoves(possible_moves_clicked);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (active_cell.Figure == null)
-                        {
-                            clicked_cell.Active = true;
-                        }
-                        else
-                        {
-                            List<Position> possible_moves = _board.GetFiltredPossiblePositions(active_cell.Figure);
-                            if (!(possible_moves.Contains(clicked_cell.Position)))
-                            {
-                                clicked_cell.Active = true;
-                            }
-                            else
-                            {
-                                if (active_cell.Figure is Pawn && (active_cell.Figure as Pawn).HasEnPassant)
-                                {
-                                    Pawn active_figure = (Pawn)active_cell.Figure;
-                                    Position tmp_pos = active_figure.Color == FigureColor.White ?
-                                        new Position(clicked_cell.Position.X - 1, clicked_cell.Position.Y) :
-                                        new Position(clicked_cell.Position.X + 1, clicked_cell.Position.Y);
-
-                                    if (tmp_pos != active_figure.Position)
-                                    {
-                                        active_figure.EnPassantAttack(tmp_pos);
-                                    }
-                                    else
-                                    {
-                                        active_cell.Figure.MoveTo(clicked_cell.Position, _board.CountMoves);
-                                    }
-                                } else if (active_cell.Figure is King && (active_cell.Figure as King).HasCastle)
-                                {
-                                    King active_figure = (King)active_cell.Figure;
-                                    if(clicked_cell.Position.Y == 2)
-                                    {
-                                        active_figure.ToCastle(clicked_cell.Position, new Position(active_figure.Position.X, 0), new Position(active_figure.Position.X, 3));
-                                    }
-                                    else if(clicked_cell.Position.Y == 6)
-                                    {
-                                        active_figure.ToCastle(clicked_cell.Position, new Position(active_figure.Position.X, 7), new Position(active_figure.Position.X, 5));
-                                    }
-                                    else
-                                    {
-                                        active_cell.Figure.MoveTo(clicked_cell.Position, _board.CountMoves);
-                                    }
-                                }
-                                else
-                                {
-                                    active_cell.Figure.MoveTo(clicked_cell.Position, _board.CountMoves);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            ClickedOnCell?.Invoke(this, new CellClickedEventArgs(clicked_cell));
         }, obj => obj is Cell));
 
         public ChessViewModel()
         {
-            _board = new Board();
+            _board = new Board(this);
             _board.PawnChanged += Board_PawnChanged;
         }
 
@@ -144,7 +62,7 @@ namespace ChessGame.ViewModel
             change_window.Left += e.Position.Y * 76;
             change_window.ShowDialog();
             ChangeResult result = change_window.ChangeResult;
-            _board.PawnChange(e.Position, e.Color, result);
+            ResultOfPawnChangeObtained?.Invoke(this, new ResultOfPawnChangeObtainedEventArgs(e.Position, e.Color, result));
         }
     }
 }
