@@ -135,10 +135,10 @@ namespace ChessGame.ViewModel
         public ChessViewModel()
         {
             _board = new Board();
-            _board.PawnChanged += _board_PawnChanged;
+            _board.PawnChanged += Board_PawnChanged;
         }
 
-        private void _board_PawnChanged(object sender, PawnChangedEventArgs e)
+        private void Board_PawnChanged(object sender, PawnChangedEventArgs e)
         {
             PawnChange change_window = new PawnChange(e.Color == FigureColor.White ? true: false);
             change_window.Left += e.Position.Y * 76;
