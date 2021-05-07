@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
+using System.Windows;
 
 namespace ChessGame.Model
 {
@@ -19,13 +20,13 @@ namespace ChessGame.Model
             Position last_pos = Position;
             Position = new_position;
             Moved?.Invoke(this, new FigureEventArgs(last_pos, new_position));
+            MessageBox.Show($"{Position}");
         }
 
         public virtual void AttackTo(Position attack_position)
         {
             Position last_pos = Position;
             Position = attack_position;
-            Moved?.Invoke(this, new FigureEventArgs(last_pos, attack_position));
             Attacked?.Invoke(this, new FigureEventArgs(last_pos, attack_position));
         }
         

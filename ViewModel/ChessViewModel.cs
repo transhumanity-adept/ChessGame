@@ -6,6 +6,7 @@ using ChessGame.Model.Figures;
 using ChessGame.Helpers;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.View;
+using ChessGame.Model.Helpers;
 using System;
 using System.Windows;
 

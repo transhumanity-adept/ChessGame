@@ -60,7 +60,7 @@
     </ApplicationDefinition>
     <Compile Include="Helpers\ChangeResult.cs" />
     <Compile Include="Helpers\ImagePath.cs" />
-    <Compile Include="Model\Helpers\CurrentMoveColors.cs" />
+    <Compile Include="Model\Helpers\PawnChangedEventArgs.cs" />
     <Compile Include="ViewModel\ChessViewModel.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellConverter.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellWithFigureConverter.cs" />
