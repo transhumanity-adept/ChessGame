@@ -5,7 +5,6 @@ using System.Linq;
 using ChessGame.Helpers;
 using ChessGame.Model.Figures;
 using ChessGame.Model.Figures.Helpers;
-using ChessGame.ViewModel;
 
 namespace ChessGame.Model
 {
@@ -20,15 +19,13 @@ namespace ChessGame.Model
         private readonly Cell[,] _cells = new Cell[8, 8];
         private readonly Figure[,] _figures = new Figure[4, 8];
         private int _count_moves = 0;
-        private ChessViewModel _view_model;
         public Cell this[int row, int column]
         {
             get => _cells[row, column];
             set => _cells[row, column] = value;
         }
-        public Board(ChessViewModel view_model)
+        public Board()
         {
-            _view_model = view_model;
             BoardStartSetup();
             _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += Figure_Moved; e.Attacked += Figure_Attacked; } });
         }

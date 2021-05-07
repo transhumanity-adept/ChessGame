@@ -8,15 +8,15 @@ namespace ChessGame.View
     /// <summary>
     /// Логика взаимодействия для PawnChange.xaml
     /// </summary>
-    public partial class PawnChangeWindow : Window
+    public partial class PawnChange : Window
     {
         public ChangeResult ChangeResult { get; private set; }
-        public PawnChangeWindow()
+        public PawnChange()
         {
             InitializeComponent();
         }
 
-        public PawnChangeWindow(bool is_white) : this()
+        public PawnChange(bool is_white) : this()
         {
             Image queen_image = button_queen.Content as Image;
             Image bishop_image = button_bishop.Content as Image;

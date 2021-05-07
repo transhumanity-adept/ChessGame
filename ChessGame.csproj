@@ -72,14 +72,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\NotifyPropertyChanged.cs" />
-    <Compile Include="View\PawnChangeWindow.xaml.cs">
-      <DependentUpon>PawnChangeWindow.xaml</DependentUpon>
+    <Compile Include="View\PawnChange.xaml.cs">
+      <DependentUpon>PawnChange.xaml</DependentUpon>
     </Compile>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\PawnChangeWindow.xaml">
+    <Page Include="View\PawnChange.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

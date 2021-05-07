@@ -39,6 +39,7 @@ namespace ChessGame.ViewModel
             }
             else
             {
+                // Выбранная ячейка является активной
                 if (clicked_cell == _board.FirstOrDefault(c => c.Active))
                 {
                     clicked_cell.Active = false;
@@ -133,13 +134,13 @@ namespace ChessGame.ViewModel
 
         public ChessViewModel()
         {
-            _board = new Board(this);
+            _board = new Board();
             _board.PawnChanged += _board_PawnChanged;
         }
 
         private void _board_PawnChanged(object sender, PawnChangedEventArgs e)
         {
-            PawnChangeWindow change_window = new PawnChangeWindow(e.Color == FigureColor.White ? true: false);
+            PawnChange change_window = new PawnChange(e.Color == FigureColor.White ? true: false);
             change_window.Left += e.Position.Y * 76;
             change_window.ShowDialog();
             ChangeResult result = change_window.ChangeResult;
