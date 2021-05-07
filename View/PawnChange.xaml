@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessGame.View"
         mc:Ignorable="d"
-        Title="PawnChange" Height="300" Width="76" WindowStyle="None" ResizeMode="NoResize">
+        Title="PawnChange" Height="304" Width="76" WindowStyle="None" ResizeMode="NoResize" BorderThickness="1">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -13,16 +13,16 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="button_Click">
+        <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke" >
             <Image></Image>
         </Button>
-        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="button_Click">
+        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
             <Image></Image>
         </Button>
-        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="button_Click">
+        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
             <Image></Image>
         </Button>
-        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="button_Click">
+        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
             <Image></Image>
         </Button>
     </Grid>

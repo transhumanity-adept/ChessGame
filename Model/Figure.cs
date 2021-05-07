@@ -21,7 +21,7 @@ namespace ChessGame.Model
             Moved?.Invoke(this, new FigureEventArgs(last_pos, new_position));
         }
 
-        public void AttackTo(Position attack_position)
+        public virtual void AttackTo(Position attack_position)
         {
             Position last_pos = Position;
             Position = attack_position;

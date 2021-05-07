@@ -15,10 +15,19 @@ namespace ChessGame.Model.Figures
         {
             MovementsState = MovementsState.Zero;
         }
+
         public delegate void EnPassantHandler(object sender, EnPassantedEventArgs e);
         public event EnPassantHandler EnPassanted;
+        public event EventHandler Changed;
 
-
+        public override void AttackTo(Position attack_position)
+        {
+            base.AttackTo(attack_position);
+            if (Position.X == (_color == FigureColor.White ? 7 : 0))
+            {
+                Changed?.Invoke(this, new EventArgs());
+            }
+        }
         public override void MoveTo(Position new_position, int count_moves)
         {
             switch (MovementsState)
@@ -28,6 +37,10 @@ namespace ChessGame.Model.Figures
             }
             if (Math.Abs(new_position.X - _position.X) == 2) EnPassantNumberMove = count_moves;
             base.MoveTo(new_position, count_moves);
+            if (Position.X == (_color == FigureColor.White ? 7 : 0))
+            {
+                Changed?.Invoke(this, new EventArgs());
+            }
         }
 
         public void EnPassantAttack(Position en_passanted_figure_position)

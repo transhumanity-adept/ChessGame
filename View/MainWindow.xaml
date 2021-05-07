@@ -7,7 +7,7 @@
         xmlns:chess_vm_converters ="clr-namespace:ChessGame.ViewModel.Converters" 
         xmlns:chess_vm ="clr-namespace:ChessGame.ViewModel"
         mc:Ignorable="d"        
-        Title="MainWindow" Height="700" Width="700"
+        Title="MainWindow" Height="750" Width="1000"
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True">
     <Window.Resources>
@@ -21,9 +21,7 @@
         <chess_vm:ChessViewModel/>
     </Window.DataContext>
     <Grid>
-        <Grid.ColumnDefinitions>
-        </Grid.ColumnDefinitions>
-        <ItemsControl ItemsSource="{Binding Board}" Width="608" Height="608" Grid.Column="1"
+        <ItemsControl ItemsSource="{Binding Board}" Width="608" Height="608" 
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center">
             <ItemsControl.ItemTemplate>
@@ -73,7 +71,7 @@
             </ItemsControl.ItemTemplate>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="8" Rows="8"/>
+                    <UniformGrid x:Name="uniform_grid" Columns="8" Rows="8"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>

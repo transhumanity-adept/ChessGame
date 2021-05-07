@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 
 namespace ChessGame
 {
@@ -10,6 +11,7 @@ namespace ChessGame
         public MainWindow()
         {
             InitializeComponent();
+            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#312E2B"));
         }
     }
 }

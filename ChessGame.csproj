@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\ChangeResult.cs" />
     <Compile Include="Helpers\ImagePath.cs" />
     <Compile Include="ViewModel\ChessViewModel.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellConverter.cs" />

@@ -1,11 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ChessGame.Helpers;
 using ChessGame.Model.Figures;
 using ChessGame.Model.Figures.Helpers;
 
 namespace ChessGame.Model
 {
+    public class PawnChangedEventArgs
+    {
+        public Position Position { get; private set; }
+        public FigureColor Color { get; private set; }
+        public PawnChangedEventArgs(Position pawn_pos, FigureColor color) => (Position, Color) = (pawn_pos, color);
+    }
     class Board : IEnumerable<Cell>
     {
         private readonly Cell[,] _cells = new Cell[8, 8];
@@ -21,6 +29,8 @@ namespace ChessGame.Model
             BoardStartSetup();
             _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += Figure_Moved; e.Attacked += Figure_Attacked; } });
         }
+        public delegate void PawnChangedHandler(object sender, PawnChangedEventArgs e);
+        public event PawnChangedHandler PawnChanged;
 
         public int CountMoves
         {
@@ -44,6 +54,8 @@ namespace ChessGame.Model
                 Pawn white_pawn = new Pawn(new Position(1, i), FigureColor.White);
                 black_pawn.EnPassanted += Pawn_EnPassanted;
                 white_pawn.EnPassanted += Pawn_EnPassanted;
+                black_pawn.Changed += Pawn_Changed;
+                white_pawn.Changed += Pawn_Changed;
                 _figures[1, i] = black_pawn;
                 _figures[2, i] = white_pawn;
                 _cells[1, i].Figure = black_pawn;
@@ -77,6 +89,13 @@ namespace ChessGame.Model
                 _cells[0, i].Figure = _figures[0, i];
                 _cells[7, i].Figure = _figures[3, i];
             }
+        }
+
+        private void Pawn_Changed(object sender, EventArgs e)
+        {
+            if (!(sender is Figure)) return;
+            Figure figure = (Figure)sender;
+            PawnChanged?.Invoke(this, new PawnChangedEventArgs(figure.Position, figure.Color));
         }
 
         private void King_ToCastled(object sender, CastlingEventArgs e)
@@ -138,6 +157,20 @@ namespace ChessGame.Model
             _count_moves++;
         }
 
+        public void PawnChange(Position position, FigureColor color, ChangeResult result)
+        {
+            Figure figure = null;
+            switch (result)
+            {
+                case ChangeResult.Queen: { figure = new Queen(position, color); break; }
+                case ChangeResult.Bishop: { figure = new Bishop(position, color); break; }
+                case ChangeResult.Knight: { figure = new Knight(position, color); break; }
+                case ChangeResult.Rook: { figure = new Rook(position, color); break; }
+            }
+            figure.Moved += Figure_Moved;
+            figure.Attacked += Figure_Attacked;
+            GetCellInPosition(position).Figure = figure;
+        }
         public void AddPossibleMoves(List<Position> possible_positions)
         {
             foreach (Position position in possible_positions)
