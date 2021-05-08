@@ -9,28 +9,59 @@
         mc:Ignorable="d"        
         Title="MainWindow" Height="750" Width="1000"
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
-        SnapsToDevicePixels="True">
+        SnapsToDevicePixels="True"
+        MinWidth="800"
+        MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
         <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
         <chess_vm_converters:BackgroundCellConverter x:Key="background_converter"/>
         <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="background_figure_converter"/>
         <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
+        <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
     </Window.Resources>
     <Window.DataContext>
         <chess_vm:ChessViewModel/>
     </Window.DataContext>
     <Grid>
-        <ItemsControl ItemsSource="{Binding Board}" Width="608" Height="608" 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="8*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.75*"/>
+            <RowDefinition Height="8.5*"/>
+            <RowDefinition Height="0.75*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0"/>
+            <Button Grid.Row="1"/>
+            <Button Grid.Row="2"/>
+        </Grid>
+        <Button Grid.Row="0" Grid.Column="1" Margin="0 0 0 0"></Button>
+        <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 0"></Button>
+        <ItemsControl ItemsSource="{Binding Board}"
                       HorizontalAlignment="Center"
-                      VerticalAlignment="Center">
+                      VerticalAlignment="Center"
+                      Grid.Column="1" Grid.Row="1">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button
                         Command="{Binding DataContext.CellClickCommand,
                             RelativeSource={RelativeSource Mode=FindAncestor,
                             AncestorType=Window}}"
-                            CommandParameter="{Binding}" Width="76">
+                        Name="Button">
+                        <Button.CommandParameter>
+                            <MultiBinding Converter="{StaticResource cmd_multi_converter}">
+                                <Binding ElementName="Button"/>
+                                <Binding />
+                            </MultiBinding>
+                        </Button.CommandParameter>
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Template">

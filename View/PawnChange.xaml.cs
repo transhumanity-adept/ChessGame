@@ -27,9 +27,6 @@ namespace ChessGame.View
             ImageSourceConverter image_source_converter = new ImageSourceConverter();
             if (is_white)
             {
-                Owner = App.Current.MainWindow;
-                Top = Owner.Top + (Owner.Height - 608) / 2 + 11.6;
-                Left = Owner.Left + (Owner.Width - 608) / 2;
                 queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteQueen);
                 bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteBishop);
                 knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteKnight);
@@ -37,9 +34,6 @@ namespace ChessGame.View
             }
             else
             {
-                Owner = App.Current.MainWindow;
-                Top = Owner.Top + (Owner.Height - 608) / 2 + 11.6 + 304;
-                Left = Owner.Left + (Owner.Width - 608) / 2;
                 queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackQueen);
                 bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackBishop);
                 knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackKnight);

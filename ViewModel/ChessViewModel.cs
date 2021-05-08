@@ -1,35 +1,22 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using ChessGame.Model;
-using ChessGame.Model.Figures;
 using ChessGame.Helpers;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.View;
 using ChessGame.Model.Helpers;
-using System;
+using ChessGame.ViewModel.Helpers;
 using System.Windows;
+using System.Windows.Controls;
+using System;
+using System.Windows.Media;
 
 namespace ChessGame.ViewModel
 {
-    public class CellClickedEventArgs
-    {
-        public Cell ClickedCell { get; private set; }
-        public CellClickedEventArgs(Cell clicked_cell) => ClickedCell = clicked_cell;
-    }
-
-    public class ResultOfPawnChangeObtainedEventArgs
-    {
-        public Position FigurePosition { get; private set; }
-        public FigureColor FigureColor { get; private set; }
-        public ChangeResult ChangeResult { get; private set; }
-        public ResultOfPawnChangeObtainedEventArgs(Position position, FigureColor color, ChangeResult result)
-            => (FigurePosition, FigureColor, ChangeResult) = (position, color, result);
-    }
     class ChessViewModel : NotifyPropertyChanged
     {
         private Board _board;
         private ICommand _cell_click_command;
+        private Button _current_clicked_button;
         public delegate void ClickedCellHandled(object sender, CellClickedEventArgs e);
         public event ClickedCellHandled ClickedOnCell;
         public delegate void ResultOfPawnChangeObtainedHandler(object sender, ResultOfPawnChangeObtainedEventArgs e);
@@ -47,9 +34,10 @@ namespace ChessGame.ViewModel
 
         public ICommand CellClickCommand => _cell_click_command ?? (_cell_click_command = new RelayCommand(obj =>
         {
-            Cell clicked_cell = (Cell)obj;
-            ClickedOnCell?.Invoke(this, new CellClickedEventArgs(clicked_cell));
-        }, obj => obj is Cell));
+            var (button, cell) = obj as Tuple<Button, Cell>;
+            _current_clicked_button = button;
+            ClickedOnCell?.Invoke(this, new CellClickedEventArgs(cell));
+        }));
 
         public ChessViewModel()
         {
@@ -59,8 +47,14 @@ namespace ChessGame.ViewModel
 
         private void Board_PawnChanged(object sender, PawnChangedEventArgs e)
         {
-            PawnChange change_window = new PawnChange(e.Color == FigureColor.White ? true: false);
-            change_window.Left += e.Position.Y * 76;
+            PawnChange change_window = new PawnChange(e.Color == FigureColor.White);
+            Point y = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
+            change_window.Left = y.X + App.Current.MainWindow.Left + 7.4;
+            change_window.Top = e.Color == FigureColor.White ?
+                y.Y + App.Current.MainWindow.Top + 30 : 
+                y.Y + App.Current.MainWindow.Top + 30 - _current_clicked_button.ActualHeight * 3;
+            change_window.Width = _current_clicked_button.ActualWidth;
+            change_window.Height = _current_clicked_button.ActualHeight * 4;
             change_window.ShowDialog();
             ChangeResult result = change_window.ChangeResult;
             ResultOfPawnChangeObtained?.Invoke(this, new ResultOfPawnChangeObtainedEventArgs(e.Position, e.Color, result));

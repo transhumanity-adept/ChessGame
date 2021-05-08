@@ -7,6 +7,7 @@ using ChessGame.Model.Figures;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.ViewModel;
 using ChessGame.Model.Helpers;
+using ChessGame.ViewModel.Helpers;
 
 namespace ChessGame.Model
 {
@@ -368,7 +369,7 @@ namespace ChessGame.Model
         public List<Position> GetFiltredPossiblePositions(Figure figure)
         {
             FigureColor figure_color = figure.Color;
-            if (figure_color != _current_move_color) return new List<Position>();
+            //if (figure_color != _current_move_color) return new List<Position>();
             Position figure_position = figure.Position;
             List<Position> tmp_pos = figure.GetPossibleMoves();
             List<Position> tmp_pos_with_figures = tmp_pos.Where(e => GetCellInPosition(e).Figure != null).ToList();
@@ -422,9 +423,8 @@ namespace ChessGame.Model
             if(figure is Pawn)
             {
                 Pawn current_pawn_figure = (Pawn)figure;
-                if (tmp_pos.Count == 0) return tmp_pos;
-                if (GetCellInPosition(tmp_pos[0]).Figure != null) tmp_pos.Clear();
-                if(figure_color == FigureColor.White)
+                if (tmp_pos.Count != 0 && GetCellInPosition(tmp_pos[0]).Figure != null) tmp_pos.Clear();
+                if (figure_color == FigureColor.White)
                 {
                     #region En Passant (Взятие на проходе)
                     if (figure_position.X == 4)

@@ -65,8 +65,11 @@
     <Compile Include="ViewModel\Converters\BackgroundCellConverter.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellWithFigureConverter.cs" />
     <Compile Include="ViewModel\Converters\CellColorConverter.cs" />
+    <Compile Include="ViewModel\Converters\CommandParameterMultiConverter.cs" />
     <Compile Include="ViewModel\Converters\ImagePathConverter.cs" />
     <Compile Include="ViewModel\Converters\IsNullConverter.cs" />
+    <Compile Include="ViewModel\Helpers\CellClickedEventArgs.cs" />
+    <Compile Include="ViewModel\Helpers\ResultOfPawnChangeObtainedEventArgs.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

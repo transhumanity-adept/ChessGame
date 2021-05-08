@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessGame.View"
         mc:Ignorable="d"
-        Title="PawnChange" Height="304" Width="76" WindowStyle="None" ResizeMode="NoResize" BorderThickness="1">
+        Title="PawnChange" WindowStyle="None" ResizeMode="NoResize" BorderThickness="1">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
