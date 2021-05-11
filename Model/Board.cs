@@ -8,9 +8,22 @@ using ChessGame.Model.Figures.Helpers;
 using ChessGame.ViewModel;
 using ChessGame.Model.Helpers;
 using ChessGame.ViewModel.Helpers;
+using System.Windows;
 
 namespace ChessGame.Model
 {
+    static class CheckmateCashed
+    {
+        public static bool Check { get; set; }
+        public static List<Position> PossiblePosition { get; set; } = new List<Position>();
+        public static List<Position> KingPossiblePositon { get; set; } = new List<Position>();
+        public static void Clear()
+        {
+            Check = default;
+            PossiblePosition.Clear();
+            KingPossiblePositon.Clear();
+        }
+    }
     class Board : IEnumerable<Cell>
     {
         #region Поля
@@ -44,6 +57,8 @@ namespace ChessGame.Model
         #region События
         public delegate void PawnChangedHandler(object sender, PawnChangedEventArgs e);
         public event PawnChangedHandler PawnChanged;
+        public delegate void GameOverHandler(object sender, GameOverEventArgs e);
+        public event GameOverHandler GameOver;
         #endregion
 
         #region Свойства
@@ -51,6 +66,12 @@ namespace ChessGame.Model
         {
             get => _count_moves;
             private set => _count_moves = value;
+        }
+
+        public FigureColor CurrentMoveColor
+        {
+            get => _current_move_color;
+            private set => _current_move_color = value;
         }
         #endregion
 
@@ -70,6 +91,13 @@ namespace ChessGame.Model
             figure.Moved += Figure_Moved;
             figure.Attacked += Figure_Attacked;
             GetCellInPosition(e.FigurePosition).Figure = figure;
+            for (int i = 0; i < _figures.GetLength(0); i++)
+            {
+                for (int j = 0; j < _figures.GetLength(1); j++)
+                {
+                    if (_figures[i, j] != null && _figures[i, j].Position == e.FigurePosition) _figures[i, j] = figure;
+                }
+            }
         }
 
         /// <summary>
@@ -90,7 +118,6 @@ namespace ChessGame.Model
             }
             else
             {
-                // Выбранная ячейка является активной
                 if (clicked_cell == active_cell)
                 {
                     clicked_cell.Active = false;
@@ -243,17 +270,19 @@ namespace ChessGame.Model
             Figure current_figure = (Figure)sender;
             Cell from = GetCellInPosition(e.MovedFrom);
             Cell to = GetCellInPosition(e.MovedTo);
-            from.Figure = null;
-            to.Figure = current_figure;
-            _count_moves++;
+            if (to.Figure != null && to.Figure is King) GameOver?.Invoke(this, new GameOverEventArgs(_current_move_color));
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
                 {
-                    if (_figures[i, j] == to.Figure) _figures[i, j] = null;
+                    if (_figures[i,j] != null && _figures[i, j].Position == e.MovedTo) _figures[i, j] = null;
                 }
             }
+            from.Figure = null;
+            to.Figure = current_figure;
+            _count_moves++;
             ReverseCurrentMoveColor();
+            //Checkmate();
         }
 
         /// <summary>
@@ -269,7 +298,41 @@ namespace ChessGame.Model
             to.Figure = current_figure;
             _count_moves++;
             ReverseCurrentMoveColor();
+            //Checkmate();
         }
+
+        private void Checkmate()
+        {
+            CheckmateCashed.Clear();
+            IEnumerable<Cell> cells = _cells.Cast<Cell>();
+            IEnumerable<Figure> figures = _figures.Cast<Figure>();
+            var black_figures = figures.Where(f => f != null && f.Color == FigureColor.Black);
+            var white_figures = figures.Where(f => f != null && f.Color == FigureColor.White);
+            if (_current_move_color == FigureColor.White)
+            {
+                King king = figures.First(c => c is King && c.Color == FigureColor.White) as King;
+                List<Position> king_possible_moves = GetFiltredPossiblePositions(king);
+                _current_move_color = FigureColor.Black;
+                var filtred_possible_moves = king_possible_moves.AsParallel().Where(p => !PositionAtRisk(p, black_figures));
+                CheckmateCashed.KingPossiblePositon = filtred_possible_moves.ToList();
+                _current_move_color = FigureColor.White;
+            }
+            else
+            {
+                King king = figures.First(c => c is King && c.Color == FigureColor.Black) as King;
+                List<Position> king_possible_moves = GetFiltredPossiblePositions(king);
+                _current_move_color = FigureColor.White;
+                var filtred_possible_moves = king_possible_moves.AsParallel().Where(p => !PositionAtRisk(p, white_figures));
+                CheckmateCashed.KingPossiblePositon = filtred_possible_moves.ToList();
+                _current_move_color = FigureColor.Black;
+            }
+        }
+
+        private bool PositionAtRisk(Position position, IEnumerable<Figure> threatening_figures)
+        {
+            return threatening_figures.AsParallel().Any(f => GetFiltredPossiblePositions(f).Contains(position));
+        }
+
 
         /// <summary>
         /// Начальная конфигурация доски
@@ -369,7 +432,7 @@ namespace ChessGame.Model
         public List<Position> GetFiltredPossiblePositions(Figure figure)
         {
             FigureColor figure_color = figure.Color;
-            //if (figure_color != _current_move_color) return new List<Position>();
+            if (figure_color != _current_move_color) return new List<Position>();
             Position figure_position = figure.Position;
             List<Position> tmp_pos = figure.GetPossibleMoves();
             List<Position> tmp_pos_with_figures = tmp_pos.Where(e => GetCellInPosition(e).Figure != null).ToList();
@@ -521,29 +584,34 @@ namespace ChessGame.Model
             }
 
             #region Рокировка
-            else if (figure is King && (figure as King).MovementsState == MovementsState.Zero && figure.Position.Y == 4)
+            else if (figure is King)
             {
-                Rook left_rook = GetCellInPosition(new Position(figure_position.X, 0)).Figure as Rook;
-                Rook right_rook = GetCellInPosition(new Position(figure_position.X, 7)).Figure as Rook;
-                if (left_rook != null && left_rook.MovementsState == MovementsState.Zero)
+                King king = (King)figure;
+                if(king.MovementsState == MovementsState.Zero && figure.Position.Y == 4)
                 {
-                    if(GetCellInPosition(new Position(figure_position.X, 1)).Figure == null &&
-                        GetCellInPosition(new Position(figure_position.X, 2)).Figure == null &&
-                        GetCellInPosition(new Position(figure_position.X, 3)).Figure == null)
+                    Rook left_rook = GetCellInPosition(new Position(figure_position.X, 0)).Figure as Rook;
+                    Rook right_rook = GetCellInPosition(new Position(figure_position.X, 7)).Figure as Rook;
+                    if (left_rook != null && left_rook.MovementsState == MovementsState.Zero)
                     {
-                        tmp_pos.Add(new Position(figure_position.X, 2));
-                        (figure as King).HasCastle = true;
+                        if (GetCellInPosition(new Position(figure_position.X, 1)).Figure == null &&
+                            GetCellInPosition(new Position(figure_position.X, 2)).Figure == null &&
+                            GetCellInPosition(new Position(figure_position.X, 3)).Figure == null)
+                        {
+                            tmp_pos.Add(new Position(figure_position.X, 2));
+                            (figure as King).HasCastle = true;
+                        }
+                    }
+                    if (right_rook != null && right_rook.MovementsState == MovementsState.Zero)
+                    {
+                        if (GetCellInPosition(new Position(figure_position.X, 5)).Figure == null &&
+                            GetCellInPosition(new Position(figure_position.X, 6)).Figure == null)
+                        {
+                            tmp_pos.Add(new Position(figure_position.X, 6));
+                            (figure as King).HasCastle = true;
+                        }
                     }
                 }
-                if(right_rook != null && right_rook.MovementsState == MovementsState.Zero)
-                {
-                    if (GetCellInPosition(new Position(figure_position.X, 5)).Figure == null &&
-                        GetCellInPosition(new Position(figure_position.X, 6)).Figure == null)
-                    {
-                        tmp_pos.Add(new Position(figure_position.X, 6));
-                        (figure as King).HasCastle = true;
-                    }
-                }
+                //if(CheckmateCashed.KingPossiblePositon.Count != 0)tmp_pos.RemoveAll(p => !CheckmateCashed.KingPossiblePositon.Contains(p));
             }
             #endregion
 

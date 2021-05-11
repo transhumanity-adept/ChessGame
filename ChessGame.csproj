@@ -60,6 +60,8 @@
     </ApplicationDefinition>
     <Compile Include="Helpers\ChangeResult.cs" />
     <Compile Include="Helpers\ImagePath.cs" />
+    <Compile Include="Model\Game.cs" />
+    <Compile Include="Model\Helpers\GameOverEventArgs.cs" />
     <Compile Include="Model\Helpers\PawnChangedEventArgs.cs" />
     <Compile Include="ViewModel\ChessViewModel.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellConverter.cs" />
@@ -70,7 +72,7 @@
     <Compile Include="ViewModel\Converters\IsNullConverter.cs" />
     <Compile Include="ViewModel\Helpers\CellClickedEventArgs.cs" />
     <Compile Include="ViewModel\Helpers\ResultOfPawnChangeObtainedEventArgs.cs" />
-    <Compile Include="ViewModel\RelayCommand.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -145,6 +147,9 @@
     <Resource Include="Images\wpawn.png" />
     <Resource Include="Images\wqueen.png" />
     <Resource Include="Images\wrook.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\chess timer.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

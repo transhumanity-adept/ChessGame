@@ -11,7 +11,6 @@ namespace ChessGame
         public MainWindow()
         {
             InitializeComponent();
-            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#312E2B"));
         }
     }
 }

@@ -14,6 +14,7 @@ namespace ChessGame.ViewModel
 {
     class ChessViewModel : NotifyPropertyChanged
     {
+        #region Поля
         private Board _board;
         private ICommand _cell_click_command;
         private Button _current_clicked_button;
@@ -21,16 +22,10 @@ namespace ChessGame.ViewModel
         public event ClickedCellHandled ClickedOnCell;
         public delegate void ResultOfPawnChangeObtainedHandler(object sender, ResultOfPawnChangeObtainedEventArgs e);
         public event ResultOfPawnChangeObtainedHandler ResultOfPawnChangeObtained;
+        #endregion
 
-        public Board Board
-        {
-            get => _board;
-            set
-            {
-                _board = value;
-                OnPropertyChanged();
-            }
-        }
+        #region Свойства
+        public Game Game { get; private set; }
 
         public ICommand CellClickCommand => _cell_click_command ?? (_cell_click_command = new RelayCommand(obj =>
         {
@@ -38,21 +33,34 @@ namespace ChessGame.ViewModel
             _current_clicked_button = button;
             ClickedOnCell?.Invoke(this, new CellClickedEventArgs(cell));
         }));
+        #endregion
 
+        #region Конструкторы
         public ChessViewModel()
         {
-            _board = new Board(this);
-            _board.PawnChanged += Board_PawnChanged;
+            Game = new Game(this, 10, 10);
+            Game.GameOver += GameOver;
+            Game.Board.PawnChanged += Board_PawnChanged;
+            Game.Board.GameOver += GameOver;
         }
 
+        private void GameOver(object sender, GameOverEventArgs e)
+        {
+            MessageBox.Show($"Выиграли {e.WinColor}");
+        }
+        #endregion
+
+        /// <summary>
+        /// Обработка события "Смена пешки"
+        /// </summary>
         private void Board_PawnChanged(object sender, PawnChangedEventArgs e)
         {
             PawnChange change_window = new PawnChange(e.Color == FigureColor.White);
-            Point y = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
-            change_window.Left = y.X + App.Current.MainWindow.Left + 7.4;
+            Point relative_location = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
+            change_window.Left = relative_location.X + App.Current.MainWindow.Left + 7.4;
             change_window.Top = e.Color == FigureColor.White ?
-                y.Y + App.Current.MainWindow.Top + 30 : 
-                y.Y + App.Current.MainWindow.Top + 30 - _current_clicked_button.ActualHeight * 3;
+                relative_location.Y + App.Current.MainWindow.Top + 30 :
+                relative_location.Y + App.Current.MainWindow.Top + 30 - _current_clicked_button.ActualHeight * 3;
             change_window.Width = _current_clicked_button.ActualWidth;
             change_window.Height = _current_clicked_button.ActualHeight * 4;
             change_window.ShowDialog();

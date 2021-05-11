@@ -11,7 +11,7 @@
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True"
         MinWidth="800"
-        MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
+        MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B">
     <Window.Resources>
         <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
         <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
@@ -43,9 +43,23 @@
             <Button Grid.Row="1"/>
             <Button Grid.Row="2"/>
         </Grid>
-        <Button Grid.Row="0" Grid.Column="1" Margin="0 0 0 0"></Button>
-        <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 0"></Button>
-        <ItemsControl ItemsSource="{Binding Board}"
+        <Grid Grid.Row="0" Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Margin="0 0 10 0" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="25" Foreground="White" Content="{Binding Game.BlackRemainingSeconds}"/>
+        </Grid>
+        <Grid Grid.Row="2" Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Margin="0 0 10 0" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="25" Foreground="White" Content="{Binding Game.WhiteRemainingSeconds}"/>
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Game.Board}"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
                       Grid.Column="1" Grid.Row="1">
