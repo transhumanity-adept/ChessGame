@@ -8,14 +8,13 @@ using ChessGame.ViewModel.Helpers;
 using System.Windows;
 using System.Windows.Controls;
 using System;
-using System.Windows.Media;
 
 namespace ChessGame.ViewModel
 {
     class ChessViewModel : NotifyPropertyChanged
     {
         #region Поля
-        private Board _board;
+        private Game _game;
         private ICommand _cell_click_command;
         private Button _current_clicked_button;
         public delegate void ClickedCellHandled(object sender, CellClickedEventArgs e);
@@ -25,7 +24,15 @@ namespace ChessGame.ViewModel
         #endregion
 
         #region Свойства
-        public Game Game { get; private set; }
+        public Game Game
+        {
+            get => _game;
+            set
+            {
+                _game = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ICommand CellClickCommand => _cell_click_command ?? (_cell_click_command = new RelayCommand(obj =>
         {
@@ -38,7 +45,7 @@ namespace ChessGame.ViewModel
         #region Конструкторы
         public ChessViewModel()
         {
-            Game = new Game(this, 10, 10);
+            Game = new Game(this, 1000, 1000);
             Game.GameOver += GameOver;
             Game.Board.PawnChanged += Board_PawnChanged;
             Game.Board.GameOver += GameOver;
@@ -46,7 +53,7 @@ namespace ChessGame.ViewModel
 
         private void GameOver(object sender, GameOverEventArgs e)
         {
-            MessageBox.Show($"Выиграли {e.WinColor}");
+            Game = null;
         }
         #endregion
 

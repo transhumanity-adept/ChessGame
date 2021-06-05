@@ -10,8 +10,7 @@
         Title="MainWindow" Height="750" Width="1000"
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True"
-        MinWidth="800"
-        MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B">
+        MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="Window_SizeChanged">
     <Window.Resources>
         <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
         <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
@@ -19,6 +18,36 @@
         <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="background_figure_converter"/>
         <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
         <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="FontFamily" Value="Comic Sans MS"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" Background="#86c93a" CornerRadius="20">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MenuLableStyle" TargetType="Label">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="20"/>
+        </Style>
     </Window.Resources>
     <Window.DataContext>
         <chess_vm:ChessViewModel/>
@@ -33,17 +62,26 @@
             <RowDefinition Height="8.5*"/>
             <RowDefinition Height="0.75*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Column="0" Grid.Row="1">
+        <Grid Grid.Column="0" Grid.Row="0" Background="#21201E"/>
+        <Grid Grid.Column="0" Grid.Row="2" Background="#21201E"/>
+        <Grid Grid.Column="0" Grid.Row="1" Background="#21201E">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button Grid.Row="0"/>
-            <Button Grid.Row="1"/>
-            <Button Grid.Row="2"/>
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Margin="7" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{DynamicResource MenuButtonStyle}" Grid.Row="0">
+                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
+                </Button>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="0" Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
+        <Grid Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>

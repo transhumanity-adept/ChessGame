@@ -73,6 +73,9 @@
     <Compile Include="ViewModel\Helpers\CellClickedEventArgs.cs" />
     <Compile Include="ViewModel\Helpers\ResultOfPawnChangeObtainedEventArgs.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="View\LoginRegistrationWindow.xaml.cs">
+      <DependentUpon>LoginRegistrationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -84,6 +87,10 @@
     <Compile Include="View\PawnChange.xaml.cs">
       <DependentUpon>PawnChange.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\LoginRegistrationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

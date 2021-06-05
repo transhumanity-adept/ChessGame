@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using ChessGame.View;
+using System.Windows;
 using System.Windows.Media;
 
 namespace ChessGame
@@ -11,6 +12,17 @@ namespace ChessGame
         public MainWindow()
         {
             InitializeComponent();
+            //Window window = new LoginRegistrationWindow();
+            //window.ShowDialog();
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if(this.WindowState == WindowState.Maximized)
+            {
+                Left = 0;
+                Top = 0;
+            }
         }
     }
 }

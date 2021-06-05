@@ -9,6 +9,7 @@ using ChessGame.ViewModel;
 using ChessGame.Model.Helpers;
 using ChessGame.ViewModel.Helpers;
 using System.Windows;
+using System.Threading.Tasks;
 
 namespace ChessGame.Model
 {
@@ -298,7 +299,7 @@ namespace ChessGame.Model
             to.Figure = current_figure;
             _count_moves++;
             ReverseCurrentMoveColor();
-            //Checkmate();
+            Checkmate();
         }
 
         private void Checkmate()
@@ -306,26 +307,8 @@ namespace ChessGame.Model
             CheckmateCashed.Clear();
             IEnumerable<Cell> cells = _cells.Cast<Cell>();
             IEnumerable<Figure> figures = _figures.Cast<Figure>();
-            var black_figures = figures.Where(f => f != null && f.Color == FigureColor.Black);
-            var white_figures = figures.Where(f => f != null && f.Color == FigureColor.White);
-            if (_current_move_color == FigureColor.White)
-            {
-                King king = figures.First(c => c is King && c.Color == FigureColor.White) as King;
-                List<Position> king_possible_moves = GetFiltredPossiblePositions(king);
-                _current_move_color = FigureColor.Black;
-                var filtred_possible_moves = king_possible_moves.AsParallel().Where(p => !PositionAtRisk(p, black_figures));
-                CheckmateCashed.KingPossiblePositon = filtred_possible_moves.ToList();
-                _current_move_color = FigureColor.White;
-            }
-            else
-            {
-                King king = figures.First(c => c is King && c.Color == FigureColor.Black) as King;
-                List<Position> king_possible_moves = GetFiltredPossiblePositions(king);
-                _current_move_color = FigureColor.White;
-                var filtred_possible_moves = king_possible_moves.AsParallel().Where(p => !PositionAtRisk(p, white_figures));
-                CheckmateCashed.KingPossiblePositon = filtred_possible_moves.ToList();
-                _current_move_color = FigureColor.Black;
-            }
+            List<List<Position>> result = new List<List<Position>>();
+            Parallel.ForEach(figures,e => result.Add(GetFiltredPossiblePositions(e)));
         }
 
         private bool PositionAtRisk(Position position, IEnumerable<Figure> threatening_figures)
@@ -432,7 +415,7 @@ namespace ChessGame.Model
         public List<Position> GetFiltredPossiblePositions(Figure figure)
         {
             FigureColor figure_color = figure.Color;
-            if (figure_color != _current_move_color) return new List<Position>();
+            //if (figure_color != _current_move_color) return new List<Position>();
             Position figure_position = figure.Position;
             List<Position> tmp_pos = figure.GetPossibleMoves();
             List<Position> tmp_pos_with_figures = tmp_pos.Where(e => GetCellInPosition(e).Figure != null).ToList();
