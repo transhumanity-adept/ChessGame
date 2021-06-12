@@ -46,6 +46,9 @@ namespace ChessGame.ViewModel
         public ChessViewModel()
         {
             Game = new Game(this, 1000, 1000);
+            //Window window = new LoginRegistrationWindow();
+            //window.ShowDialog();
+            //App.Current.MainWindow.Close();
             Game.GameOver += GameOver;
             Game.Board.PawnChanged += Board_PawnChanged;
             Game.Board.GameOver += GameOver;
@@ -53,6 +56,7 @@ namespace ChessGame.ViewModel
 
         private void GameOver(object sender, GameOverEventArgs e)
         {
+            MessageBox.Show($"Победила {e.GameResult} сторона");
             Game = null;
         }
         #endregion

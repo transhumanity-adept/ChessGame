@@ -12,8 +12,6 @@ namespace ChessGame
         public MainWindow()
         {
             InitializeComponent();
-            //Window window = new LoginRegistrationWindow();
-            //window.ShowDialog();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

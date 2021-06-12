@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="LoginRegistrationWindow" Height="450" Width="1000" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <Style x:Key="text_block_dark" TargetType="Label">
+        <Style x:Key="LableDarkStyle" TargetType="Label">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="19"/>
             <Setter Property="FontWeight" Value="Medium"/>
@@ -23,7 +23,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="text_box_dark" TargetType="TextBox">
+        <Style x:Key="TextBoxDarkStyle" TargetType="TextBox">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="19"/>
             <Setter Property="FontWeight" Value="Medium"/>
@@ -41,7 +41,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="password_box_dark" TargetType="PasswordBox">
+        <Style x:Key="PasswordBoxDarkStyle" TargetType="PasswordBox">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="19"/>
             <Setter Property="FontWeight" Value="Medium"/>
@@ -59,7 +59,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="button_dark" TargetType="Button">
+        <Style x:Key="ButtonDarkStyle" TargetType="Button">
             <Setter Property="Height" Value="55"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="18"/>
@@ -112,18 +112,18 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Content="Login" Style="{StaticResource text_block_dark}"></Label>
-                <Label Grid.Row="1" Grid.Column="0" Content="Password" Style="{StaticResource text_block_dark}"></Label>
-                <TextBox MaxLength="30" Grid.Row="0" Grid.Column="1" Style="{StaticResource text_box_dark}"/>
-                <PasswordBox MaxLength="30" Grid.Row="1" Grid.Column="1" x:Name="password_box" Style="{StaticResource password_box_dark}"/>
+                <Label Grid.Row="0" Grid.Column="0" Content="Login" Style="{StaticResource LableDarkStyle}"></Label>
+                <Label Grid.Row="1" Grid.Column="0" Content="Password" Style="{StaticResource LableDarkStyle}"></Label>
+                <TextBox MaxLength="30" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBoxDarkStyle}"/>
+                <PasswordBox MaxLength="30" Grid.Row="1" Grid.Column="1" x:Name="password_box" Style="{StaticResource PasswordBoxDarkStyle}"/>
             </Grid>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="Войти" Margin="0 0 20 0" Style="{StaticResource button_dark}"></Button>
-                <Button Grid.Column="1" Content="Зарегистироваться" Margin="20 0 0 0" Style="{StaticResource button_dark}"></Button>
+                <Button Grid.Column="0" Content="Войти" Margin="0 0 20 0" Style="{StaticResource ButtonDarkStyle}"></Button>
+                <Button Grid.Column="1" Content="Зарегистироваться" Margin="20 0 0 0" Style="{StaticResource ButtonDarkStyle}"></Button>
             </Grid>
         </Grid>
     </Grid>

@@ -66,9 +66,9 @@
         <Grid Grid.Column="0" Grid.Row="2" Background="#21201E"/>
         <Grid Grid.Column="0" Grid.Row="1" Background="#21201E">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="4.5*"/>
+                <RowDefinition Height="2.5*"/>
+                <RowDefinition Height="2.5*"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
@@ -76,7 +76,13 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Button Margin="7" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{DynamicResource MenuButtonStyle}" Grid.Row="0">
+                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="0" Margin="19">
+                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
+                </Button>
+                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="1" Margin="19">
+                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
+                </Button>
+                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="2" Margin="19">
                     <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
                 </Button>
             </Grid>
@@ -145,6 +151,23 @@
                                         </MultiDataTrigger.Conditions>
                                         <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_figure_converter}}"/>
                                     </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}"  Value="true"/>
+                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <!--<MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}" Value="true"/>
+                                            <Condition Binding="{Binding IsPossible}" Value="false"/>
+                                            <Condition Binding="{Binding Active}" Value="false"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Background" Value="#ff0000"/>
+                                    </MultiDataTrigger>-->
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>

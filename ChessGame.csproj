@@ -62,6 +62,7 @@
     <Compile Include="Helpers\ImagePath.cs" />
     <Compile Include="Model\Game.cs" />
     <Compile Include="Model\Helpers\GameOverEventArgs.cs" />
+    <Compile Include="Model\Helpers\GameResult.cs" />
     <Compile Include="Model\Helpers\PawnChangedEventArgs.cs" />
     <Compile Include="ViewModel\ChessViewModel.cs" />
     <Compile Include="ViewModel\Converters\BackgroundCellConverter.cs" />

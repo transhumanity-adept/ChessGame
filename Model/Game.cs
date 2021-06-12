@@ -58,7 +58,7 @@ namespace ChessGame.Model
                 if (WhiteRemainingSeconds.TotalSeconds <= 0)
                 {
                     _one_second_timer.Stop();
-                    GameOver?.Invoke(this, new GameOverEventArgs(FigureColor.Black));
+                    GameOver?.Invoke(this, new GameOverEventArgs(GameResult.BlackWin));
                 }
             }
             else
@@ -67,7 +67,7 @@ namespace ChessGame.Model
                 if (BlackRemainingSeconds.TotalSeconds <= 0)
                 {
                     _one_second_timer.Stop();
-                    GameOver?.Invoke(this, new GameOverEventArgs(FigureColor.White));
+                    GameOver?.Invoke(this, new GameOverEventArgs(GameResult.WhiteWin));
                 }
             }
         }

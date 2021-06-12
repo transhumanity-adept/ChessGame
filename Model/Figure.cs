@@ -23,8 +23,9 @@ namespace ChessGame.Model
 
         public virtual void AttackTo(Position attack_position)
         {
-            Attacked?.Invoke(this, new FigureEventArgs(Position, attack_position));
+            Position last_pos = Position;
             Position = attack_position;
+            Attacked?.Invoke(this, new FigureEventArgs(last_pos, attack_position));
         }
         
         public string ImagePath
