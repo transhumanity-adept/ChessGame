@@ -56,8 +56,9 @@ namespace ChessGame.ViewModel
 
         private void GameOver(object sender, GameOverEventArgs e)
         {
-            MessageBox.Show($"Победила {e.GameResult} сторона");
             Game = null;
+            GameResultWindow game_result = new GameResultWindow(e.GameResult, App.Current.MainWindow);
+            game_result.ShowDialog();
         }
         #endregion
 
@@ -68,11 +69,11 @@ namespace ChessGame.ViewModel
         {
             PawnChange change_window = new PawnChange(e.Color == FigureColor.White);
             Point relative_location = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
-            change_window.Left = relative_location.X + App.Current.MainWindow.Left + 7.4;
+            change_window.Left = relative_location.X + App.Current.MainWindow.Left + 6;
             change_window.Top = e.Color == FigureColor.White ?
                 relative_location.Y + App.Current.MainWindow.Top + 30 :
                 relative_location.Y + App.Current.MainWindow.Top + 30 - _current_clicked_button.ActualHeight * 3;
-            change_window.Width = _current_clicked_button.ActualWidth;
+            change_window.Width = _current_clicked_button.ActualWidth + 3;
             change_window.Height = _current_clicked_button.ActualHeight * 4;
             change_window.ShowDialog();
             ChangeResult result = change_window.ChangeResult;

@@ -5,25 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessGame.View"
         mc:Ignorable="d"
-        Title="PawnChange" WindowStyle="None" ResizeMode="NoResize" BorderThickness="1">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke" >
-            <Image></Image>
-        </Button>
-        <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
-            <Image></Image>
-        </Button>
-        <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
-            <Image></Image>
-        </Button>
-        <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="button_Click" BorderThickness="0" Background="WhiteSmoke">
-            <Image></Image>
-        </Button>
-    </Grid>
+        Title="PawnChange" WindowStyle="None" ResizeMode="NoResize" Background="Transparent" AllowsTransparency="True" Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style x:Key="button_dark" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" Background="Transparent" CornerRadius="25">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#312E2B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Border x:Name="border" BorderThickness="1" Background="#21201E">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button x:Name="button_queen" Grid.Row="0" ButtonBase.Click="button_Click" Style="{DynamicResource button_dark}">
+                <Image></Image>
+            </Button>
+            <Button x:Name="button_bishop" Grid.Row="1" ButtonBase.Click="button_Click" Style="{DynamicResource button_dark}">
+                <Image></Image>
+            </Button>
+            <Button x:Name="button_knight" Grid.Row="2" ButtonBase.Click="button_Click" Style="{DynamicResource button_dark}">
+                <Image></Image>
+            </Button>
+            <Button x:Name="button_rook" Grid.Row="3" ButtonBase.Click="button_Click" Style="{DynamicResource button_dark}">
+                <Image></Image>
+            </Button>
+        </Grid>
+    </Border>
 </Window>

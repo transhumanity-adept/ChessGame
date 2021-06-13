@@ -9,7 +9,7 @@ namespace ChessGame.ViewModel.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is null ? true : false;
+            return value is null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

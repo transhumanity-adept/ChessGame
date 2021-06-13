@@ -97,6 +97,7 @@ namespace ChessGame.Model
                 }
             }
             Checkmate();
+            ReverseCurrentMoveColor();
         }
 
         /// <summary>
@@ -295,8 +296,11 @@ namespace ChessGame.Model
             from.Figure = null;
             to.Figure = current_figure;
             _count_moves++;
-            ReverseCurrentMoveColor();
-            Checkmate();
+            if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
+            {
+                ReverseCurrentMoveColor();
+                Checkmate();
+            }
         }
 
         /// <summary>
@@ -311,10 +315,12 @@ namespace ChessGame.Model
             from.Figure = null;
             to.Figure = current_figure;
             _count_moves++;
-            ReverseCurrentMoveColor();
-            Checkmate();
+            if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
+            {
+                ReverseCurrentMoveColor();
+                Checkmate();
+            }
         }
-
 
         /// <summary>
         /// Кэширование возможных ходов с проверкой на мат
@@ -356,13 +362,19 @@ namespace ChessGame.Model
                         })) white_king_possible_moves.Remove(e);
                     }
                 });
-                foreach (var item in black_pseudo_possible_moves)
+                foreach (var (figure, pseudo_possible_moves) in black_pseudo_possible_moves)
                 {
-                    if(item.pseudo_possible_moves.Contains(white_king.Position) && !(item.figure is Knight))
+                    if(pseudo_possible_moves.Contains(white_king.Position) && !(figure is Knight))
                     {
-                        List<Position> pos_between = GetPositionBetween(white_king.Position, item.figure.Position);
+                        List<Position> pos_between = GetPositionBetween(white_king.Position, figure.Position);
                         List<Figure> figures_between = GetFiguresInPositions(pos_between);
-                        if (figures_between.Count == 1 && figures_between[0].Color == FigureColor.White) white_possible_moves.Find(e => e.figure == figures_between[0]).possible_moves.Clear();
+                        if (figures_between.Count == 1 && figures_between[0].Color == FigureColor.White)
+                        {
+                            var defensive_figure = white_possible_moves.Find(e => e.figure == figures_between[0]);
+                            var defensive_figure_possible_moves = pseudo_possible_moves.Intersect(defensive_figure.possible_moves).Intersect(pos_between).ToList();
+                            defensive_figure.possible_moves.Clear();
+                            defensive_figure.possible_moves.AddRange(defensive_figure_possible_moves);
+                        }
                     }
                 }
                 List<(Figure figure, List<Position> possible_moves)> checkmating_figures = black_possible_moves.FindAll(e => e.possible_moves.Contains(white_king.Position));
@@ -466,7 +478,6 @@ namespace ChessGame.Model
             CheckmateCache.CachedMoves.AddRange(white_possible_moves);
             CheckmateCache.CachedMoves.AddRange(black_possible_moves);
         }
-
 
         /// <summary>
         /// Получить все фигуры в позициях
