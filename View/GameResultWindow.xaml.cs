@@ -33,7 +33,7 @@ namespace ChessGame.View
 
         private void OpenAnimation()
         {
-            DoubleAnimation font_size_animation = new DoubleAnimation(35,75,_duration_for_font_size);
+            DoubleAnimation font_size_animation = new DoubleAnimation(35,60,_duration_for_font_size);
             DoubleAnimation opacity_animation = new DoubleAnimation(0, 1, _duration_for_open_opacity);
             opacity_animation.Completed += Opacity_animation_Completed1;
             text_block.BeginAnimation(FontSizeProperty, font_size_animation);

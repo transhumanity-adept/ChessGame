@@ -11,7 +11,7 @@ namespace ChessGame.Model.Figures
         public bool HasEnPassant { get; set; }
         public int EnPassantNumberMove { get; set; }
         public Pawn(Position position, FigureColor color) 
-            : base(position, color == FigureColor.White ? ImagePaths.WhitePawn : ImagePaths.BlackPawn, color)
+            : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
         {
             MovementsState = MovementsState.Zero;
         }

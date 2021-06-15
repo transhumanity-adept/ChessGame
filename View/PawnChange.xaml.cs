@@ -60,18 +60,18 @@ namespace ChessGame.View
             ImageSourceConverter image_source_converter = new ImageSourceConverter();
             if (is_white)
             {
-                queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteQueen);
-                bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteBishop);
-                knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteKnight);
-                rook_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.WhiteRook);
+                queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.WhiteQueen);
+                bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.WhiteBishop);
+                knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.WhiteKnight);
+                rook_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.WhiteRook);
                 border.CornerRadius = new CornerRadius(0, 0, 25, 25);
             }
             else
             {
-                queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackQueen);
-                bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackBishop);
-                knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackKnight);
-                rook_image.Source = (ImageSource)image_source_converter.ConvertFromString(ImagePaths.BlackRook);
+                queen_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.BlackQueen);
+                bishop_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.BlackBishop);
+                knight_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.BlackKnight);
+                rook_image.Source = (ImageSource)image_source_converter.ConvertFromString(RelativePaths.BlackRook);
                 border.CornerRadius = new CornerRadius(25, 25, 0, 0);
             }
         }

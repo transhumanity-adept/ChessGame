@@ -14,7 +14,7 @@ namespace ChessGame
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if(this.WindowState == WindowState.Maximized)
+            if (WindowState == WindowState.Maximized)
             {
                 Left = 0;
                 Top = 0;

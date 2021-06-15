@@ -7,7 +7,7 @@ namespace ChessGame.Model.Figures
     class King : Figure
     {
         public King(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? ImagePaths.WhiteKing : ImagePaths.BlackKing, color) 
+            : base(position, color == FigureColor.White ? RelativePaths.WhiteKing : RelativePaths.BlackKing, color) 
         {
             MovementsState = MovementsState.Zero;
         }

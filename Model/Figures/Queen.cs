@@ -7,7 +7,7 @@ namespace ChessGame.Model.Figures
     class Queen : Figure
     {
         public Queen(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? ImagePaths.WhiteQueen : ImagePaths.BlackQueen, color) { }
+            : base(position, color == FigureColor.White ? RelativePaths.WhiteQueen : RelativePaths.BlackQueen, color) { }
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();

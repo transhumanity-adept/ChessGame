@@ -7,7 +7,7 @@ namespace ChessGame.Model.Figures
     class Rook : Figure
     {
         public Rook(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? ImagePaths.WhiteRook : ImagePaths.BlackRook, color) 
+            : base(position, color == FigureColor.White ? RelativePaths.WhiteRook : RelativePaths.BlackRook, color) 
         {
             MovementsState = MovementsState.Zero;
         }

@@ -7,7 +7,7 @@ using System;
 
 namespace ChessGame.Model
 {
-    class Game : NotifyPropertyChanged
+    public class Game : NotifyPropertyChanged
     {
         private TimeSpan _white_remaining_seconds;
         private TimeSpan _black_remaining_seconds;

@@ -18,6 +18,7 @@
         <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="background_figure_converter"/>
         <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
         <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
+        <chess_vm_converters:IsWhiteMoveConverter x:Key="is_white_move_converter"/>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="18"/>
@@ -48,6 +49,50 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="20"/>
         </Style>
+        <Style x:Key="LabelWhiteTimeStyle" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontFamily" Value="Comic Sans MS"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Label}">
+                        <Border Background="Transparent" SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="true">
+                                <Setter Property="Foreground" Value="#88ff00"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="LabelBlackTimeStyle" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontFamily" Value="Comic Sans MS"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Label}">
+                        <Border Background="Transparent" SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="false">
+                                <Setter Property="Foreground" Value="#88ff00"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Window.DataContext>
         <chess_vm:ChessViewModel/>
@@ -58,9 +103,9 @@
             <ColumnDefinition Width="8*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.75*"/>
+            <RowDefinition Height="1.5*"/>
             <RowDefinition Height="8.5*"/>
-            <RowDefinition Height="0.75*"/>
+            <RowDefinition Height="1.5*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="0" Grid.Row="0" Background="#21201E"/>
         <Grid Grid.Column="0" Grid.Row="2" Background="#21201E"/>
@@ -87,21 +132,43 @@
                 </Button>
             </Grid>
         </Grid>
-        <Grid Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Margin="0 0 10 0" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="25" Foreground="White" Content="{Binding Game.BlackRemainingSeconds}"/>
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0 5 0 5">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="1">
+                <Label Grid.Column="3" Style="{DynamicResource LabelBlackTimeStyle}" Content="{Binding Game.BlackRemainingSeconds}"/>
+            </Grid>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="1" Grid.Row="1" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label Grid.Column="0" Grid.Row="1" Content="{Binding BlackPlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
+                <Label Grid.Column="2" Grid.Row="1" Content="{Binding BlackPlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="2" Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 5 0 5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Margin="0 0 10 0" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="25" Foreground="White" Content="{Binding Game.WhiteRemainingSeconds}"/>
+        <Grid Grid.Row="2" Grid.Column="1" Margin="0 5 0 5">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Label Name="black_time" Grid.Column="3" Content="{Binding Game.WhiteRemainingSeconds}" Style="{DynamicResource LabelWhiteTimeStyle}"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="1" Grid.Row="1" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label Grid.Column="0" Grid.Row="1" Content="{Binding WhitePlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
+                <Label Grid.Column="2" Grid.Row="1" Content="{Binding WhitePlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
+            </Grid>
         </Grid>
         <ItemsControl ItemsSource="{Binding Game.Board}"
                       HorizontalAlignment="Center"
@@ -160,14 +227,6 @@
                                             <Setter Property="Cursor" Value="Hand"/>
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
-                                    <!--<MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}" Value="true"/>
-                                            <Condition Binding="{Binding IsPossible}" Value="false"/>
-                                            <Condition Binding="{Binding Active}" Value="false"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Background" Value="#ff0000"/>
-                                    </MultiDataTrigger>-->
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>

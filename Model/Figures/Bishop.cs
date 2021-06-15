@@ -7,7 +7,7 @@ namespace ChessGame.Model.Figures
     class Bishop : Figure
     {
         public Bishop(Position position, FigureColor color)
-            : base(position, color == FigureColor.White ? ImagePaths.WhiteBishop : ImagePaths.BlackBishop, color) { }
+            : base(position, color == FigureColor.White ? RelativePaths.WhiteBishop : RelativePaths.BlackBishop, color) { }
 
         public override List<Position> GetPossibleMoves()
         {

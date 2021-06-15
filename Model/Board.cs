@@ -22,12 +22,11 @@ namespace ChessGame.Model
             CachedMoves.Clear();
         }
     }
-    class Board : IEnumerable<Cell>
+    public class Board : NotifyPropertyChanged, IEnumerable<Cell>
     {
         #region Поля
         private readonly Cell[,] _cells = new Cell[8, 8];
         private readonly Figure[,] _figures = new Figure[4, 8];
-        private int _count_moves = 0;
         private FigureColor _current_move_color;
         #endregion
 
@@ -60,16 +59,16 @@ namespace ChessGame.Model
         #endregion
 
         #region Свойства
-        public int CountMoves
-        {
-            get => _count_moves;
-            private set => _count_moves = value;
-        }
+        public int CountMoves { get; private set; } = 0;
 
         public FigureColor CurrentMoveColor
         {
             get => _current_move_color;
-            private set => _current_move_color = value;
+            private set
+            {
+                _current_move_color = value;
+                OnPropertyChanged();
+            }
         }
         #endregion
 
@@ -272,7 +271,7 @@ namespace ChessGame.Model
                 }
             }
             attacking_figure.HasEnPassant = false;
-            _count_moves++;
+            CountMoves++;
             ReverseCurrentMoveColor();
             Checkmate();
         }
@@ -295,7 +294,7 @@ namespace ChessGame.Model
             }
             from.Figure = null;
             to.Figure = current_figure;
-            _count_moves++;
+            CountMoves++;
             if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
             {
                 ReverseCurrentMoveColor();
@@ -314,7 +313,7 @@ namespace ChessGame.Model
             Cell to = GetCellInPosition(e.MovedTo);
             from.Figure = null;
             to.Figure = current_figure;
-            _count_moves++;
+            CountMoves++;
             if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
             {
                 ReverseCurrentMoveColor();
@@ -559,7 +558,7 @@ namespace ChessGame.Model
         /// </summary>
         private void BoardStartSetup()
         {
-            _current_move_color = FigureColor.White;
+            CurrentMoveColor = FigureColor.White;
             for (int i = 0; i < _cells.GetLength(0); i++)
             {
                 for (int j = 0; j < _cells.GetLength(1); j++)
@@ -721,12 +720,12 @@ namespace ChessGame.Model
                         {
                             en_passant_pawn_right = GetCellInPosition(new Position(figure_position.X, figure_position.Y + 1)).Figure as Pawn;
                         } catch { }
-                        if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == _count_moves - 1)
+                        if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_left.Position.X + 1, en_passant_pawn_left.Position.Y));
                             current_pawn_figure.HasEnPassant = true;
                         }
-                        if(en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == _count_moves - 1)
+                        if(en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_right.Position.X + 1, en_passant_pawn_right.Position.Y));
                             current_pawn_figure.HasEnPassant = true;
@@ -768,12 +767,12 @@ namespace ChessGame.Model
                         {
                             en_passant_pawn_right = GetCellInPosition(new Position(figure_position.X, figure_position.Y + 1)).Figure as Pawn;
                         } catch { }
-                        if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == _count_moves - 1)
+                        if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_left.Position.X - 1, en_passant_pawn_left.Position.Y));
                             current_pawn_figure.HasEnPassant = true;
                         }
-                        else if (en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == _count_moves - 1)
+                        else if (en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_right.Position.X - 1, en_passant_pawn_right.Position.Y));
                             current_pawn_figure.HasEnPassant = true;
@@ -841,10 +840,10 @@ namespace ChessGame.Model
         /// </summary>
         private void ReverseCurrentMoveColor()
         {
-            switch (_current_move_color)
+            switch (CurrentMoveColor)
             {
-                case FigureColor.White: { _current_move_color = FigureColor.Black; break; }
-                case FigureColor.Black: { _current_move_color = FigureColor.White; break; }
+                case FigureColor.White: { CurrentMoveColor = FigureColor.Black; break; }
+                case FigureColor.Black: { CurrentMoveColor = FigureColor.White; break; }
             }
         }
 

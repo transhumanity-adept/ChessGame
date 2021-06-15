@@ -2,7 +2,7 @@
 
 namespace ChessGame.Model.Helpers
 {
-    class PawnChangedEventArgs
+    public class PawnChangedEventArgs
     {
         public Position Position { get; private set; }
         public FigureColor Color { get; private set; }
