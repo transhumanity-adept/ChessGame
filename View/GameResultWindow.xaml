@@ -13,10 +13,9 @@
         AllowsTransparency="True"
         Loaded="Window_Loaded">
     <Window.Resources>
-        <DropShadowEffect x:Key="shadow_effect" Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="35" Opacity="0.9">
-        </DropShadowEffect>
+        <DropShadowEffect x:Key="shadow_effect" Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="2" Opacity="1"/>
         <FontFamily x:Key="font_family">
-            Comic Sans MS
+            Arial
         </FontFamily>
         <Style x:Key="button_ok_style" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
@@ -45,20 +44,21 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Margin="50" Effect="{StaticResource shadow_effect}" Background="Transparent">
+    <Border Margin="50" Background="Transparent">
         <Grid Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="9*"/>
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <TextBlock x:Name="text_block" 
-               Text="Победила команда черных"
+               Text="ПОБЕДИЛА КОМАНДА ЧЕРНЫХ"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                TextAlignment="Center"
                TextWrapping="Wrap"
                Foreground="White"
                FontFamily="{StaticResource font_family}"
+               Effect="{StaticResource shadow_effect}"
                FontSize="46"
                FontWeight="Bold"
                >

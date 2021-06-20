@@ -11,6 +11,13 @@ namespace ChessGame.Model.Figures
         {
             MovementsState = MovementsState.Zero;
         }
+
+        public King(Position position, FigureColor color, MovementsState movement_state, bool has_castle)
+            : base(position, color == FigureColor.White ? RelativePaths.WhiteKing : RelativePaths.BlackKing, color)
+        {
+            MovementsState = movement_state;
+            HasCastle = has_castle;
+        }
         public delegate void CastlingHandler(object sender, CastlingEventArgs e);
         public event CastlingHandler ToCastled;
         public MovementsState MovementsState { get; private set; }
@@ -43,6 +50,10 @@ namespace ChessGame.Model.Figures
             try { result.Add(new Position(_position.X + 1, _position.Y - 1)); } catch { }
             try { result.Add(new Position(_position.X + 1, _position.Y + 1)); } catch { }
             return result;
+        }
+        public override string ToString()
+        {
+            return $"{base.ToString()} {MovementsState} {HasCastle}";
         }
     }
 }

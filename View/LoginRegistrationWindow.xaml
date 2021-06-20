@@ -88,7 +88,7 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="Login" Style="{StaticResource LableDarkStyle}"></Label>
                 <Label Grid.Row="1" Grid.Column="0" Content="Password" Style="{StaticResource LableDarkStyle}"></Label>
                 <Border x:Name="border_login" Grid.Row="0" Grid.Column="1" Background="#3d3c38" CornerRadius="0 20 20 0" Margin="5 0 0 0" Padding="10 0 0 0" Height="55">
-                    <TextBox x:Name="text_box_login" MaxLength="30" IsKeyboardFocusedChanged="KeyboardFocusableChanged" Foreground="White" HorizontalContentAlignment="Left" 
+                    <TextBox x:Name="text_box_login" MaxLength="15" IsKeyboardFocusedChanged="KeyboardFocusableChanged" Foreground="White" HorizontalContentAlignment="Left" 
                              VerticalContentAlignment="Center" FontSize="19" FontWeight="Medium" FontFamily="Comic Sans MS" Background="Transparent" BorderThickness="0"/>
                 </Border>
                 <TextBlock Grid.Row="0" Grid.Column="1" Background="Transparent" Text="Enter login . . ." IsHitTestVisible="False" TextAlignment="Left" VerticalAlignment="Center" 

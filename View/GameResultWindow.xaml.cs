@@ -19,14 +19,14 @@ namespace ChessGame.View
             InitializeComponent();
         }
 
-        public GameResultWindow(GameResult result, Window owner) : this()
+        public GameResultWindow(GameResult result) : this()
         {
-            Owner = owner;
-            (Width, Height, Left, Top) = (owner.ActualWidth, owner.ActualHeight, owner.Left, owner.Top);
+            Owner = App.Current.MainWindow;
+            (Width, Height, Left, Top) = (Owner.ActualWidth, Owner.ActualHeight, Owner.Left, Owner.Top);
             switch (result)
             {
-                case GameResult.BlackWin: { text_block.Text = "Победила\nкоманда\nчерных"; break; }
-                case GameResult.WhiteWin: { text_block.Text = "Победила\nкоманда\nбелых"; break; }
+                case GameResult.BlackWin: { text_block.Text = "ПОБЕДИЛА\nКОМАНДА\nЧЕРНЫХ"; break; }
+                case GameResult.WhiteWin: { text_block.Text = "ПОБЕДИЛА\nКОМАНДА\nБЕЛЫХ"; break; }
                 default: { text_block.Text = "Ничья"; break; }
             }
         }

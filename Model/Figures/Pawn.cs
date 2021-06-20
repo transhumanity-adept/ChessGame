@@ -16,6 +16,14 @@ namespace ChessGame.Model.Figures
             MovementsState = MovementsState.Zero;
         }
 
+        public Pawn(Position position, FigureColor color, MovementsState movement_state, bool has_en_passant, int en_passant_number_move)
+            : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
+        {
+            MovementsState = movement_state;
+            HasEnPassant = has_en_passant;
+            EnPassantNumberMove = en_passant_number_move;
+        }
+
         public delegate void EnPassantHandler(object sender, EnPassantedEventArgs e);
         public event EnPassantHandler EnPassanted;
         public event EventHandler Changed;
@@ -70,6 +78,10 @@ namespace ChessGame.Model.Figures
                 }
             }
             return result;
+        }
+        public override string ToString()
+        {
+            return $"{base.ToString()} {MovementsState} {HasEnPassant} {EnPassantNumberMove}";
         }
     }
 }

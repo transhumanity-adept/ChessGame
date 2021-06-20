@@ -45,7 +45,7 @@ namespace ChessGame.Model
 
         public override string ToString()
         {
-            return $"{_x} {_y}";
+            return $"{_x}|{_y}";
         }
     }
 }

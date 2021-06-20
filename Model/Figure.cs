@@ -44,5 +44,10 @@ namespace ChessGame.Model
             => (Position, ImagePath, Color) = (position, image, color);
 
         public abstract List<Position> GetPossibleMoves();
+
+        public override string ToString()
+        {
+            return $"{GetType().Name} {Position} {Color}";
+        }
     }
 }

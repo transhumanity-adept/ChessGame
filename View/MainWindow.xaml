@@ -10,7 +10,10 @@
         Title="MainWindow" Height="750" Width="1000"
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True"
-        MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="Window_SizeChanged">
+        MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="Window_SizeChanged" Loaded="WindowLoaded">
+    <Window.DataContext>
+        <chess_vm:ChessViewModel/>
+    </Window.DataContext>
     <Window.Resources>
         <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
         <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
@@ -19,35 +22,212 @@
         <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
         <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
         <chess_vm_converters:IsWhiteMoveConverter x:Key="is_white_move_converter"/>
+        <chess_vm_converters:TimeConverter x:Key="time_converter"/>
+        <ControlTemplate x:Key="ButtonDefaultDarkTemplate" TargetType="Button">
+            <Border Name="border" Background="#86c93a" CornerRadius="20">
+                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                    <Setter TargetName="border" Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="ButtonUploadGame" TargetType="Button">
+            <Border Name="border" Background="#86c93a" CornerRadius="20">
+                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                    <Setter TargetName="border" Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding ElementName=ListBoxUploadedGames, Path=SelectedItem, Converter={StaticResource null_converter}}" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#312E2B"/>
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MenuButtonWithGameTemplate" TargetType="Button">
+            <Border Name="border" Background="#86c93a" CornerRadius="20" Height="45" Margin="10 0 10 0">
+                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                    <Setter TargetName="border" Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="border" Property="Background" Value="#312E2B"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#86db25" To="#312E2B" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#312E2B" To="#86db25" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MenuButtonWithoutGameTemplate" TargetType="Button">
+            <Border Name="border" Background="#86c93a" CornerRadius="20" Height="45" Margin="10 0 10 0">
+                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                    <Setter TargetName="border" Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="border" Property="Background" Value="#312E2B"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#86db25" To="#312E2B" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#312E2B" To="#86db25" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="button_hide_main_menu_template" TargetType="Button">
+            <Border Background="#21201E">
+                <ContentPresenter/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="button_show_main_menu_template" TargetType="Button">
+            <Border Background="#312E2B">
+                <ContentPresenter/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="ButtonGiveUpTemplate" TargetType="Button">
+            <Border Name="border" Background="#86c93a" CornerRadius="20" Height="45" Margin="10 0 10 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label VerticalContentAlignment="Center" HorizontalAlignment="Right" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" Foreground="{TemplateBinding Foreground}"  Content="{TemplateBinding Content}"/>
+                    <Border x:Name="_border_give_up_svg" Grid.Column="1" Height="20" HorizontalAlignment="Left" Padding="10 0 0 0">
+                        <Viewbox>
+                            <Path x:Name="PathGiveUpSVG" Fill="White" Data="M51.371,3.146c-0.203-0.081-5.06-1.997-10.815-1.997c-3.434,0-6.47,0.687-9.024,2.042C29.269,4.392,26.199,5,22.407,5  
+                              C17.099,5,11.865,3.788,10,3.307V1c0-0.553-0.447-1-1-1S8,0.447,8,1v3c0,0.014,0.007,0.026,0.008,0.04C8.008,4.052,8,4.062,8,4.074  
+                              V33v1.074V59c0,0.553,0.447,1,1,1s1-0.447,1-1V35.373C12.273,35.937,17.243,37,22.407,37c4.122,0,7.507-0.688,10.062-2.042  
+                              c2.263-1.201,4.983-1.81,8.087-1.81c5.357,0,10.027,1.836,10.073,1.854c0.309,0.124,0.657,0.086,0.932-0.102  
+                              C51.835,34.716,52,34.406,52,34.074v-30C52,3.665,51.751,3.298,51.371,3.146z">
+                            </Path>
+                        </Viewbox>
+                    </Border>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="Background" Value="#86db25"/>
+                    <Setter TargetName="border" Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                    <Setter Property="IsEnabled" Value="True"/>
+                    <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="false">
+                    <Setter TargetName="PathGiveUpSVG" Property="Fill" Value="#21201E"/>
+                </DataTrigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="border" Property="Background" Value="#312E2B"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#86db25" To="#312E2B" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="#312E2B" To="#86db25" Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="FontFamily" Value="Comic Sans MS"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Name="border" Background="#86c93a" CornerRadius="20">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#86db25"/>
-                                <Setter TargetName="border" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="30" Opacity="0.6"/>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter Property="Cursor" Value="Hand"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="MenuLableStyle" TargetType="Label">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontSize" Value="11"/>
         </Style>
         <Style x:Key="LabelWhiteTimeStyle" TargetType="{x:Type Label}">
             <Setter Property="Foreground" Value="White"/>
@@ -93,152 +273,496 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </Window.Resources>
-    <Window.DataContext>
-        <chess_vm:ChessViewModel/>
-    </Window.DataContext>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="8*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="1.5*"/>
-            <RowDefinition Height="8.5*"/>
-            <RowDefinition Height="1.5*"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Column="0" Grid.Row="0" Background="#21201E"/>
-        <Grid Grid.Column="0" Grid.Row="2" Background="#21201E"/>
-        <Grid Grid.Column="0" Grid.Row="1" Background="#21201E">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="4.5*"/>
-                <RowDefinition Height="2.5*"/>
-                <RowDefinition Height="2.5*"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="0" Margin="19">
-                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
-                </Button>
-                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="1" Margin="19">
-                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
-                </Button>
-                <Button Style="{DynamicResource MenuButtonStyle}" Grid.Row="2" Margin="19">
-                    <Label Style="{DynamicResource MenuLableStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Новая игра"/>
-                </Button>
-            </Grid>
-        </Grid>
-        <Grid Grid.Row="0" Grid.Column="1" Margin="0 5 0 5">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="1">
-                <Label Grid.Column="3" Style="{DynamicResource LabelBlackTimeStyle}" Content="{Binding Game.BlackRemainingSeconds}"/>
-            </Grid>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="4*"/>
-                </Grid.ColumnDefinitions>
-                <Image Grid.Column="1" Grid.Row="1" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Label Grid.Column="0" Grid.Row="1" Content="{Binding BlackPlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
-                <Label Grid.Column="2" Grid.Row="1" Content="{Binding BlackPlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
-            </Grid>
-        </Grid>
-        <Grid Grid.Row="2" Grid.Column="1" Margin="0 5 0 5">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Label Name="black_time" Grid.Column="3" Content="{Binding Game.WhiteRemainingSeconds}" Style="{DynamicResource LabelWhiteTimeStyle}"/>
-            </Grid>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="4*"/>
-                </Grid.ColumnDefinitions>
-                <Image Grid.Column="1" Grid.Row="1" Source="C:\Users\79107\Desktop\ChessGame\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Label Grid.Column="0" Grid.Row="1" Content="{Binding WhitePlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
-                <Label Grid.Column="2" Grid.Row="1" Content="{Binding WhitePlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
-            </Grid>
-        </Grid>
-        <ItemsControl ItemsSource="{Binding Game.Board}"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Grid.Column="1" Grid.Row="1">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button
-                        Command="{Binding DataContext.CellClickCommand,
-                            RelativeSource={RelativeSource Mode=FindAncestor,
-                            AncestorType=Window}}"
-                        Name="Button">
-                        <Button.CommandParameter>
-                            <MultiBinding Converter="{StaticResource cmd_multi_converter}">
-                                <Binding ElementName="Button"/>
-                                <Binding />
-                            </MultiBinding>
-                        </Button.CommandParameter>
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Template">
+        <Style x:Key="SliderThumbStyle" TargetType="Thumb">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Ellipse x:Name="Ellipse" Height="15" Width="15" Fill="#86c93a"></Ellipse>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="Ellipse" Property="Fill" Value="#88ff00"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Effect">
                                     <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
+                                        <DropShadowEffect Color="#88ff00" Direction="270" ShadowDepth="1" BlurRadius="20"/>
                                     </Setter.Value>
                                 </Setter>
-                                <Setter Property="Content" Value="{Binding Position}"/>
-                                <Setter Property="Background" Value="{Binding Color, Converter={StaticResource color_converter}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SliderRepeatIncreaseStyle" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border BorderThickness="1" BorderBrush="Black" Background="Black" Height="4"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SliderRepeatDecreaseStyle" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border SnapsToDevicePixels="True" Background="#88ff00"  BorderThickness="1" BorderBrush="#88ff00" Height="4"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <ControlTemplate x:Key="Slider" TargetType="Slider">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Track Grid.Row="1" x:Name="PART_Track">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource SliderRepeatDecreaseStyle}"  Command="Slider.DecreaseLarge" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource SliderThumbStyle}"/>
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource SliderRepeatIncreaseStyle}" Command="Slider.IncreaseLarge" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+        <Style x:Key="ListBoxItemDarkStyle" TargetType="ListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="border" CornerRadius="10" Margin="5" Height="65" Width="200" Background="#312E2B">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Background" TargetName="border" Value="#524e4a"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </MultiTrigger.Setters>
+                                <MultiTrigger.EnterActions>
+                                    <RemoveStoryboard BeginStoryboardName="ExitAnimation"/>
+                                    <RemoveStoryboard BeginStoryboardName="EnterAnimation"/>
+                                    <BeginStoryboard x:Name="ShowStoryBoard">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Height" From="65" To="70" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Width" From="200" To="230" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiTrigger.EnterActions>
+                                <MultiTrigger.ExitActions>
+                                    <BeginStoryboard x:Name="HideBeginStoryBoard">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Height" From="70" To="65" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Width" From="230" To="200" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiTrigger.ExitActions>
+                            </MultiTrigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#524e4a"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Trigger.EnterActions>
+                                    <RemoveStoryboard BeginStoryboardName="ShowStoryBoard"/>
+                                    <RemoveStoryboard BeginStoryboardName="HideBeginStoryBoard"/>
+                                    <BeginStoryboard x:Name="EnterAnimation">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Height" From="65" To="70" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Width" From="200" To="230" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard x:Name="ExitAnimation">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Height" From="70" To="65" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Width" From="230" To="200" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="column_main_menu" Width="auto" MaxWidth="230"/>
+            <ColumnDefinition Width="8*"/>
+        </Grid.ColumnDefinitions>
+        <Border x:Name="border_main_menu" Grid.Column="0" Width="190">
+            <Grid Background="#21201E">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1.5*"/>
+                    <RowDefinition Height="8.5*"/>
+                    <RowDefinition Height="1.5*"/>
+                </Grid.RowDefinitions>
+                <Button Template="{StaticResource button_hide_main_menu_template}" Click="ButtonHideMainMenuClick" Width="24" Height="24" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                        Margin="0 10 5 0" BorderThickness="0">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox RenderTransformOrigin="0.5,0.5">
+                        <Viewbox.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="90"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Viewbox.RenderTransform>
+                        <Viewbox.Style>
+                            <Style TargetType="Viewbox">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Active}" Value="true">
-                                        <Setter Property="Background" Value="Red"/>
-                                    </DataTrigger>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding IsPossible}" Value="true"/>
-                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="true"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_converter}}"/>
-                                    </MultiDataTrigger>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding IsPossible}" Value="true"/>
-                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_figure_converter}}"/>
-                                    </MultiDataTrigger>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}"  Value="true"/>
-                                            <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <MultiDataTrigger.Setters>
-                                            <Setter Property="Cursor" Value="Hand"/>
-                                        </MultiDataTrigger.Setters>
-                                    </MultiDataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="1" BlurRadius="10"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Viewbox.Style>
+                        <Path Fill="#86c93a" Data="M132 307 c-61 -62 -112 -119 -112 -128 0 -18 31 
+                    -49 49 -49 7 0 52 36 99 80 48 44 89 80 93 80 3 0 45 
+                    -36 92 -80 47 -44 92 -80 99 -80 18 0 48 32 48 51 0 19 
+                    -221 239 -240 239 -9 0 -66 -51 -128 -113z"/>
+                    </Viewbox>
+                </Button>
+                <Grid x:Name="grid_main_menu_buttons" Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithoutGameTemplate}" Grid.Row="0" Content="НОВАЯ ИГРА" Command="{Binding NewGameCommand}" Click="ButtonNewGameClick">
+                        <Button.CommandParameter>
+                            <MultiBinding Converter="{StaticResource cmd_multi_converter}">
+                                <Binding ElementName="slider_white_time" Path="Value"/>
+                                <Binding ElementName="slider_black_time" Path="Value"/>
+                            </MultiBinding>
+                        </Button.CommandParameter>
+                    </Button>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithGameTemplate}" Grid.Row="1" Content="СОХРАНИТЬ ИГРУ" Command="{Binding SaveGameCommand}"/>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonGiveUpTemplate}" Grid.Row="2" Content="СДАТЬСЯ" Command="{Binding GiveUpCommand}"/>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithGameTemplate}" Grid.Row="3" Content="ЗАВЕРШИТЬ НИЧЬЕЙ" Command="{Binding EndDrawCommand}"/>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithoutGameTemplate}" Grid.Row="4" Content="ЗАГРУЗИТЬ ИГРУ" Click="ButtonUploapClick"/>
+                    <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithoutGameTemplate}" Grid.Row="5" Content="НАСТРОЙКИ" Click="ButtonOptionsClick"/>
+                </Grid>
+            </Grid>
+        </Border>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1.5*"/>
+                <RowDefinition Height="8.5*"/>
+                <RowDefinition Height="1.5*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="grid_show_main_menu" Grid.Column="0" Width="30" Visibility="Collapsed">
+                    <Button Click="ButtonShowMainMenuClick" Template="{StaticResource button_show_main_menu_template}" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 10 0 0" BorderThickness="0" Background="#312E2B">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <Image Source="{Binding Path=Figure.ImagePath, Converter={StaticResource image_path_converter}}"/>
+                        <Viewbox RenderTransformOrigin="0.5,0.5">
+                            <Viewbox.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="-90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Viewbox.RenderTransform>
+                            <Viewbox.Style>
+                                <Style TargetType="Viewbox">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Effect">
+                                                <Setter.Value>
+                                                    <DropShadowEffect Color="#86db25" Direction="270" ShadowDepth="1" BlurRadius="10"/>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Viewbox.Style>
+                            <Path Fill="#86c93a" Data="M132 307 c-61 -62 -112 -119 -112 -128 0 -18 31 
+                    -49 49 -49 7 0 52 36 99 80 48 44 89 80 93 80 3 0 45 
+                    -36 92 -80 47 -44 92 -80 99 -80 18 0 48 32 48 51 0 19 
+                    -221 239 -240 239 -9 0 -66 -51 -128 -113z"/>
+                        </Viewbox>
                     </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid x:Name="uniform_grid" Columns="8" Rows="8"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+                </Grid>
+                <Grid Grid.Column="1" Margin="0 5 0 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="1">
+                        <Label Grid.Column="3" Style="{DynamicResource LabelBlackTimeStyle}" Content="{Binding Game.BlackRemainingSeconds}"/>
+                    </Grid>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="1" Grid.Row="1" Source="pack://application:,,,/ChessGame;component\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="1" Content="{Binding BlackPlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
+                        <Label Grid.Column="2" Grid.Row="1" Content="{Binding BlackPlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="2" Margin="0 5 0 5">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Label Name="black_time" Grid.Column="3" Content="{Binding Game.WhiteRemainingSeconds}" Style="{DynamicResource LabelWhiteTimeStyle}"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="1" Grid.Row="1" Source="pack://application:,,,/ChessGame;component\Images\chess timer.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Label Grid.Column="0" Grid.Row="1" Content="{Binding WhitePlayer.Login}" HorizontalContentAlignment="Right" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="22" Foreground="White"/>
+                    <Label Grid.Column="2" Grid.Row="1" Content="{Binding WhitePlayer.Rating}" HorizontalContentAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20" Foreground="White"/>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Name="_border_notify" CornerRadius="20" Background="#de0000" Height="40" Margin="10 10 10 10" Visibility="Collapsed">
+                    <Label x:Name="_lable_notify" Content="Сообщение об ошибке" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                       FontWeight="Normal" FontSize="21" FontFamily="Comic Sans MS" Foreground="White"/>
+                </Border>
+                <Grid Grid.Row="1" x:Name="_grid_game_board">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Border x:Name="border_options" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" Width="200" Visibility="Collapsed" BorderThickness="1 0 0 0" BorderBrush="#312E2B">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="100"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="button_options_flip_sides" Visibility="Collapsed" Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonDefaultDarkTemplate}" Margin="10 25 10 25" Grid.Row="0" Content="ПОМЕНЯТЬСЯ СТОРОНАМИ" Command="{Binding FlipSidesCommand}"/>
+                            <Grid x:Name="grid_options_white_time" Grid.Row="1" Margin="15 0 25 0" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Время белых:" Foreground="White" TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" 
+                                           FontSize="13"/>
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=slider_white_time, Path=Value, Converter={StaticResource time_converter}}" Margin="5 0 0 0" Foreground="White" 
+                                           TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="13"/>
+                                </Grid>
+                                <Slider x:Name="slider_white_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
+                                    SmallChange="30" LargeChange="30" TickFrequency="30" Minimum="30" Background="#312E2B"/>
+                            </Grid>
+                            <Grid x:Name="grid_options_black_time" Grid.Row="2" Margin="15 0 25 0" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="95"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Время черных:" Foreground="White" TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" 
+                                           FontSize="13"/>
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=slider_black_time, Path=Value, Converter={StaticResource time_converter}}" Margin="5 0 0 0" Foreground="White" 
+                                           TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="13"/>
+                                </Grid>
+                                <Slider x:Name="slider_black_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
+                                    SmallChange="30" LargeChange="30" TickFrequency="30" Minimum="30" Background="#312E2B"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <Border BorderThickness="1 0 0 0" BorderBrush="#312E2B" x:Name="BorderUploadGame" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" 
+                        Width="250" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="70"/>
+                            </Grid.RowDefinitions>
+                            <ListBox x:Name="ListBoxUploadedGames" Visibility="Collapsed" ItemsSource="{Binding Dates}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                             HorizontalContentAlignment="Stretch" SelectionMode="Single" ItemContainerStyle="{StaticResource ListBoxItemDarkStyle}" Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type ListBoxItem}">
+                                        <Border CornerRadius="20">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <Grid Grid.Row="0">
+                                                    <TextBlock Text="{Binding}" HorizontalAlignment="Center" Foreground="#86db25" FontSize="13" FontFamily="Comic Sans MS"/>
+                                                </Grid>
+                                                <Grid Grid.Row="1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="2*"/>
+                                                        <ColumnDefinition Width="8*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid Grid.Column="0" HorizontalAlignment="Left" Margin="5 0 0 5">
+                                                        <Viewbox>
+                                                            <Canvas Width="400" Height="400">
+                                                                <Path Fill="White" Data="M275.8 269.6c-52.8-40.2-46.9-75.2-47.6-89.5h32.2c3.8-6.6 5.7-14 5.7-21.5l-36.5-24c22.6-16.3 27.8-47.9 11.5-70.5-5.6-7.7-13.2-13.8-22.1-17.3-5.9-2.4-47.2 133.4-47.2 133.4-.1 3.1-.2 7.2-.2 12.1 0 13.5 33.1 11.4 31.4 23.4-2.6 17.8-3.2 31.3-18.5 74.1-10.4 28.9-79.4 0-84.3 14.2-3.6 10.6-5.3 21.7-5.2 32.8 0 1.3 2.7 20.4 105.1 20.4s105.1-19.1 105.1-20.4c-.1-29.2-10.9-53.1-29.4-67.2z" />
+                                                                <Path Fill="White" Data="M198.1 287.6c5.7-25.9 10.7-53.5 13.8-70 3.8-20.6-27.5-24.3-40.3-26.2-.6 17.6-5.5 46.2-47.4 78.2-11.3 8.6-19.7 20.9-24.6 35.8 11.3 5.5 26.4 8.8 49.7 8.8 14.9 0 42.6 1.8 48.8-26.6zM220.1 180.1c5-12.9 4.3-21.5 4.3-21.5l-20.7-24c22-9.4 35.2-27 35.2-47.5 0-15.8-7.4-30.6-19.9-40.2-25.8-10.5-55.3 1.9-65.9 27.7-8.8 21.6-1.7 46.4 17.2 60l-36.5 24c0 7.6 1.9 15 5.7 21.5h80.6z" />
+                                                            </Canvas>
+                                                        </Viewbox>
+                                                    </Grid>
+                                                    <TextBlock Margin="0 0 10 5" FontSize="14" FontFamily="Comic Sans MS" HorizontalAlignment="Right" Grid.Column="1" Foreground="White"
+                                                       Text="{Binding DataContext.WhitePlayer.Login, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+                                                </Grid>
+                                                <Grid Grid.Row="2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="2*"/>
+                                                        <ColumnDefinition Width="8*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid Grid.Column="0" Margin="5 0 0 4" HorizontalAlignment="Left">
+                                                        <Viewbox>
+                                                            <Canvas Width="400" Height="400">
+                                                                <Path Fill="Black" Data="M275.8 269.6c-52.8-40.2-46.9-75.2-47.6-89.5h32.2c3.8-6.6 5.7-14 5.7-21.5l-36.5-24c22.6-16.3 27.8-47.9 11.5-70.5-5.6-7.7-13.2-13.8-22.1-17.3-5.9-2.4-47.2 133.4-47.2 133.4-.1 3.1-.2 7.2-.2 12.1 0 13.5 33.1 11.4 31.4 23.4-2.6 17.8-3.2 31.3-18.5 74.1-10.4 28.9-79.4 0-84.3 14.2-3.6 10.6-5.3 21.7-5.2 32.8 0 1.3 2.7 20.4 105.1 20.4s105.1-19.1 105.1-20.4c-.1-29.2-10.9-53.1-29.4-67.2z" />
+                                                                <Path Fill="Black" Data="M198.1 287.6c5.7-25.9 10.7-53.5 13.8-70 3.8-20.6-27.5-24.3-40.3-26.2-.6 17.6-5.5 46.2-47.4 78.2-11.3 8.6-19.7 20.9-24.6 35.8 11.3 5.5 26.4 8.8 49.7 8.8 14.9 0 42.6 1.8 48.8-26.6zM220.1 180.1c5-12.9 4.3-21.5 4.3-21.5l-20.7-24c22-9.4 35.2-27 35.2-47.5 0-15.8-7.4-30.6-19.9-40.2-25.8-10.5-55.3 1.9-65.9 27.7-8.8 21.6-1.7 46.4 17.2 60l-36.5 24c0 7.6 1.9 15 5.7 21.5h80.6z" />
+                                                            </Canvas>
+                                                        </Viewbox>
+                                                    </Grid>
+                                                    <TextBlock FontSize="14" FontFamily="Comic Sans MS" Margin="0 0 10 0" HorizontalAlignment="Right" Grid.Column="1" Foreground="White"
+                                                       Text="{Binding DataContext.BlackPlayer.Login, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Border Grid.Row="1" BorderThickness="0 1 0 0" BorderBrush="#312E2B">
+                                <Grid>
+                                    <Button x:Name="ButtonUploadGame" Visibility="Collapsed" Style="{StaticResource MenuButtonStyle}" Template="{StaticResource ButtonUploadGame}"
+                                            Margin="10 12 10 12" Content="ЗАГРУЗИТЬ ВЫБРАННУЮ ПАРТИЮ" FontSize="11" Click="ButtonUploadGameClick">
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <ItemsControl ItemsSource="{Binding Game.Board}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" Grid.Column="1" x:Name="ItemsContolBoard">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.CellClickCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Name="Button">
+                                    <Button.CommandParameter>
+                                        <MultiBinding Converter="{StaticResource cmd_multi_converter}">
+                                            <Binding ElementName="Button"/>
+                                            <Binding />
+                                        </MultiBinding>
+                                    </Button.CommandParameter>
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Content" Value="{Binding Position}"/>
+                                            <Setter Property="Background" Value="{Binding Color, Converter={StaticResource color_converter}}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Active}" Value="true">
+                                                    <Setter Property="Background" Value="Red"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsPossible}" Value="true"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="true"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_converter}}"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsPossible}" Value="true"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_figure_converter}}"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}"  Value="true"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Image Source="{Binding Path=Figure.ImagePath, Converter={StaticResource image_path_converter}}"/>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid x:Name="uniform_grid" Columns="8" Rows="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Grid>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

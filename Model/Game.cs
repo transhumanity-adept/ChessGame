@@ -13,8 +13,10 @@ namespace ChessGame.Model
         private TimeSpan _black_remaining_seconds;
         private Board _board;
         private Timer _one_second_timer = new Timer(1000);
+        private ChessViewModel _chess_vm;
         public delegate void GameOverHandler(object sender, GameOverEventArgs e);
         public event GameOverHandler GameOver;
+        public event Action EventsDetached;
         public TimeSpan WhiteRemainingSeconds
         {
             get => _white_remaining_seconds;
@@ -35,19 +37,60 @@ namespace ChessGame.Model
             }
         }
 
+        public DateTime SaveDate { get; private set; }
+
         public Board Board
         {
             get => _board;
             private set => _board = value;
         }
 
-        public Game(ChessViewModel view_model, int white_total_seconds, int black_total_seconds)
+        public Game(DateTime save_date, ChessViewModel view_model, int white_total_seconds, int black_total_seconds)
         {
+            _chess_vm = view_model;
+            SaveDate = save_date;
             WhiteRemainingSeconds = new TimeSpan(0,0, white_total_seconds);
             BlackRemainingSeconds = new TimeSpan(0, 0, black_total_seconds);
-            Board = new Board(view_model);
+            Board board = new Board(this, view_model);
+            board.GameOver += BoardGameOver;
+            board.EventsDetached += BoardEventsDetached;
+            Board = board;
             _one_second_timer.Elapsed += Timer_Elapsed;
             _one_second_timer.Start();
+        }
+
+        private void BoardEventsDetached()
+        {
+            _one_second_timer.Stop();
+            EventsDetached?.Invoke();
+        }
+
+        private void BoardGameOver(object sender, GameOverEventArgs e)
+        {
+            _one_second_timer.Stop();
+            GameOver?.Invoke(this, e);
+        }
+
+        public Game(DateTime save_date, ChessViewModel view_model, string restore_state_info)
+        {
+            _chess_vm = view_model;
+            SaveDate = save_date;
+            RestoreState(view_model, restore_state_info);
+            _one_second_timer.Elapsed += Timer_Elapsed;
+            _one_second_timer.Start();
+        }
+
+        private void RestoreState(ChessViewModel view_model, string restore_state_info)
+        {
+            string[] game_info = restore_state_info.Split('-');
+            TimeSpan white_remaining_seconds = TimeSpan.Parse(game_info[0]);
+            TimeSpan black_remaining_seconds = TimeSpan.Parse(game_info[1]);
+            Board restored_board = new Board(this, view_model, game_info[2]);
+            restored_board.GameOver += BoardGameOver;
+            restored_board.EventsDetached += BoardEventsDetached;
+            WhiteRemainingSeconds = white_remaining_seconds;
+            BlackRemainingSeconds = black_remaining_seconds;
+            Board = restored_board;
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -70,6 +113,11 @@ namespace ChessGame.Model
                     GameOver?.Invoke(this, new GameOverEventArgs(GameResult.WhiteWin));
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{WhiteRemainingSeconds}-{BlackRemainingSeconds}-{_board}";
         }
     }
 }
