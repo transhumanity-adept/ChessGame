@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace ChessGame.ViewModel
 {
+    /// <summary>
+    /// Класс связи модели и представления
+    /// </summary>
     public class ChessViewModel : NotifyPropertyChanged
     {
         #region Поля
@@ -276,7 +279,7 @@ namespace ChessGame.ViewModel
                                         Game game = new Game(game_save_date, this, game_info);
                                         game.GameOver += GameGameOver;
                                         game.EventsDetached += GameEventsDetached;
-                                        game.Board.PawnChangedResult += Board_PawnChanged;
+                                        game.Board.PawnChangedResult += BoardPawnChanged;
                                         Game = game;
                                         DataWorkCompleted?.Invoke(this, true, "Игра загружена");
                                     });
@@ -299,7 +302,7 @@ namespace ChessGame.ViewModel
             Game game = new Game(DateTime.MinValue, this, (int)white_seconds, (int)black_seconds);
             game.GameOver += GameGameOver;
             game.EventsDetached += GameEventsDetached;
-            game.Board.PawnChangedResult += Board_PawnChanged;
+            game.Board.PawnChangedResult += BoardPawnChanged;
             Game = game;
         }));
         public ICommand GiveUpCommand => _give_up_command ?? (_give_up_command = new RelayCommand(obj => 
@@ -370,6 +373,7 @@ namespace ChessGame.ViewModel
             BlackPlayer = tmp;
         }));
         #endregion
+
         #region Конструкторы
         public ChessViewModel()
         {
@@ -381,17 +385,27 @@ namespace ChessGame.ViewModel
         }
         #endregion
 
-        private void GameEventsDetached()
+        #region Методы
+        /// <summary>
+        /// Обработчик события "Подписки обнулены"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        private void GameEventsDetached(object sender)
         {
             App.Current.Dispatcher.Invoke(new Action(() =>
             {
                 if (Game == null) return;
                 Game.GameOver -= GameGameOver;
                 Game.EventsDetached -= GameEventsDetached;
-                Game.Board.PawnChangedResult -= Board_PawnChanged;
+                Game.Board.PawnChangedResult -= BoardPawnChanged;
                 Game = null;
             }));
         }
+        /// <summary>
+        /// Обработчик события "Игра окончена"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        /// <param name="game_result">Результат окончания игры</param>
         private void GameGameOver(object sender, GameResult game_result)
         {
             App.Current.Dispatcher.Invoke(new Action(() =>
@@ -399,13 +413,19 @@ namespace ChessGame.ViewModel
                 if (Game == null) return;
                 if (Game.SaveDate != DateTime.MinValue) RemoveGameFromDataBase(Game.SaveDate, _white_player.Login, _black_player.Login);
                 Game.GameOver -= GameGameOver;
-                Game.Board.PawnChangedResult -= Board_PawnChanged;
+                Game.Board.PawnChangedResult -= BoardPawnChanged;
                 Game = null;
                 var main_window = App.Current.MainWindow;
                 GameResultWindow game_result_window = new GameResultWindow(game_result);
                 game_result_window.ShowDialog();
             }));
         }
+        /// <summary>
+        /// Удаление записи о игре из базы данных
+        /// </summary>
+        /// <param name="save_date">Дата сохранения игры</param>
+        /// <param name="white_player_login">Логин игрока, играющего за белых</param>
+        /// <param name="black_player_login">Логин игрока, играющего за черных</param>
         private void RemoveGameFromDataBase(DateTime save_date, string white_player_login, string black_player_login)
         {
             Task.Run(() =>
@@ -435,11 +455,13 @@ namespace ChessGame.ViewModel
                 }
             });
         }
-
         /// <summary>
-        /// Обработка события "Смена пешки"
+        /// Обработчик события "Появился запрос на смену пешки"
         /// </summary>
-        private void Board_PawnChanged(object sender, Position position, FigureColor color)
+        /// <param name="sender">Источник события</param>
+        /// <param name="position">Позиция пешки</param>
+        /// <param name="color">Цвет пешки</param>
+        private void BoardPawnChanged(object sender, Position position, FigureColor color)
         {
             PawnChangeWindow change_window = new PawnChangeWindow(color == FigureColor.White);
             Point relative_location = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
@@ -453,5 +475,6 @@ namespace ChessGame.ViewModel
             ChangeResult result = change_window.ChangeResult;
             ResultOfPawnChangeObtained?.Invoke(this, position, color, result);
         }
+        #endregion
     }
 }

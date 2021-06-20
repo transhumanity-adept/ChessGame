@@ -4,14 +4,20 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using ChessGame.Model;
 using ChessGame.Model.Helpers;
 
 namespace ChessGame.ViewModel.Converters
 {
+    /// <summary>
+    /// Конвертер фона ячейки с фигурой
+    /// </summary>
     public class BackgroundCellConverter : IValueConverter
     {
-
+        #region Методы
+        /// <summary>
+        /// Конвертирование значения
+        /// </summary>
+        /// <returns>Сконвертированное значение</returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             RectangleGeometry radiuse_rect = new RectangleGeometry();
@@ -47,10 +53,14 @@ namespace ChessGame.ViewModel.Converters
                 return new DrawingBrush(drawingGroup);
             }
         }
-
+        /// <summary>
+        /// Обратное конвертирование
+        /// </summary>
+        /// <returns>Сконвертированное значение</returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return DependencyProperty.UnsetValue;
         }
+        #endregion
     }
 }

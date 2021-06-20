@@ -73,7 +73,7 @@ namespace ChessGame.Model
 
         #region События
         public event Action<object, GameResult> GameOver;
-        public event Action EventsDetached;
+        public event Action<object> EventsDetached;
         #endregion
 
         #region Методы
@@ -84,7 +84,7 @@ namespace ChessGame.Model
         private void BoardEventsDetached(object sender)
         {
             _one_second_timer.Stop();
-            EventsDetached?.Invoke();
+            EventsDetached?.Invoke(this);
         }
         /// <summary>
         /// Обработчик события "Игра окончена"
