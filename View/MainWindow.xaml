@@ -10,19 +10,19 @@
         Title="MainWindow" Height="750" Width="1000"
         d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True"
-        MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="Window_SizeChanged" Loaded="WindowLoaded">
+        MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="WindowSizeChanged" Loaded="WindowLoaded">
     <Window.DataContext>
         <chess_vm:ChessViewModel/>
     </Window.DataContext>
     <Window.Resources>
-        <chess_vm_converters:CellColorConverter x:Key="color_converter"/>
-        <chess_vm_converters:ImagePathConverter x:Key="image_path_converter"/>
-        <chess_vm_converters:BackgroundCellConverter x:Key="background_converter"/>
-        <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="background_figure_converter"/>
-        <chess_vm_converters:IsNullConverter x:Key="null_converter"/>
-        <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
-        <chess_vm_converters:IsWhiteMoveConverter x:Key="is_white_move_converter"/>
-        <chess_vm_converters:TimeConverter x:Key="time_converter"/>
+        <chess_vm_converters:CellColorConverter x:Key="ColorConverter"/>
+        <chess_vm_converters:ImagePathConverter x:Key="ImagePathConverter"/>
+        <chess_vm_converters:BackgroundCellConverter x:Key="BackgroundConverter"/>
+        <chess_vm_converters:BackgroundCellWithFigureConverter x:Key="BackgroundFigureConverter"/>
+        <chess_vm_converters:IsNullConverter x:Key="NullConverter"/>
+        <chess_vm_converters:CommandParameterMultiConverter x:Key="CommandMultyConverter"/>
+        <chess_vm_converters:IsWhiteMoveConverter x:Key="IsWhiteMoveConverter"/>
+        <chess_vm_converters:TimeConverter x:Key="TimeConverter"/>
         <ControlTemplate x:Key="ButtonDefaultDarkTemplate" TargetType="Button">
             <Border Name="border" Background="#86c93a" CornerRadius="20">
                 <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -53,7 +53,7 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding ElementName=ListBoxUploadedGames, Path=SelectedItem, Converter={StaticResource null_converter}}" Value="True">
+                <DataTrigger Binding="{Binding ElementName=_list_box_uploaded_games, Path=SelectedItem, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter TargetName="border" Property="Background" Value="#312E2B"/>
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
@@ -73,10 +73,10 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -114,10 +114,10 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -191,15 +191,15 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="False"/>
                     <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource null_converter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="True"/>
                     <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="false">
+                <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
                     <Setter TargetName="PathGiveUpSVG" Property="Fill" Value="#21201E"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -243,7 +243,7 @@
                             <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="true">
+                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="true">
                                 <Setter Property="Foreground" Value="#88ff00"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -265,7 +265,7 @@
                             <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource is_white_move_converter}}" Value="false">
+                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
                                 <Setter Property="Foreground" Value="#88ff00"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -405,7 +405,7 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="column_main_menu" Width="auto" MaxWidth="230"/>
+            <ColumnDefinition x:Name="_column_main_menu" Width="auto" MaxWidth="230"/>
             <ColumnDefinition Width="8*"/>
         </Grid.ColumnDefinitions>
         <Border x:Name="border_main_menu" Grid.Column="0" Width="190">
@@ -454,7 +454,7 @@
                     -221 239 -240 239 -9 0 -66 -51 -128 -113z"/>
                     </Viewbox>
                 </Button>
-                <Grid x:Name="grid_main_menu_buttons" Grid.Row="1">
+                <Grid x:Name="_grid_main_menu_buttons" Grid.Row="1">
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -465,9 +465,9 @@
                     </Grid.RowDefinitions>
                     <Button Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource MenuButtonWithoutGameTemplate}" Grid.Row="0" Content="НОВАЯ ИГРА" Command="{Binding NewGameCommand}" Click="ButtonNewGameClick">
                         <Button.CommandParameter>
-                            <MultiBinding Converter="{StaticResource cmd_multi_converter}">
-                                <Binding ElementName="slider_white_time" Path="Value"/>
-                                <Binding ElementName="slider_black_time" Path="Value"/>
+                            <MultiBinding Converter="{StaticResource CommandMultyConverter}">
+                                <Binding ElementName="_slider_white_time" Path="Value"/>
+                                <Binding ElementName="_slider_black_time" Path="Value"/>
                             </MultiBinding>
                         </Button.CommandParameter>
                     </Button>
@@ -490,7 +490,7 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Grid x:Name="grid_show_main_menu" Grid.Column="0" Width="30" Visibility="Collapsed">
+                <Grid x:Name="_grid_show_main_menu" Grid.Column="0" Width="30" Visibility="Collapsed">
                     <Button Click="ButtonShowMainMenuClick" Template="{StaticResource button_show_main_menu_template}" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 10 0 0" BorderThickness="0" Background="#312E2B">
                         <Button.Style>
                             <Style TargetType="Button">
@@ -583,15 +583,15 @@
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Border x:Name="border_options" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" Width="200" Visibility="Collapsed" BorderThickness="1 0 0 0" BorderBrush="#312E2B">
+                    <Border x:Name="_border_options" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" Width="200" Visibility="Collapsed" BorderThickness="1 0 0 0" BorderBrush="#312E2B">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="100"/>
                                 <RowDefinition Height="100"/>
                                 <RowDefinition Height="100"/>
                             </Grid.RowDefinitions>
-                            <Button x:Name="button_options_flip_sides" Visibility="Collapsed" Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonDefaultDarkTemplate}" Margin="10 25 10 25" Grid.Row="0" Content="ПОМЕНЯТЬСЯ СТОРОНАМИ" Command="{Binding FlipSidesCommand}"/>
-                            <Grid x:Name="grid_options_white_time" Grid.Row="1" Margin="15 0 25 0" Visibility="Collapsed">
+                            <Button x:Name="_button_options_flip_sides" Visibility="Collapsed" Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonDefaultDarkTemplate}" Margin="10 25 10 25" Grid.Row="0" Content="ПОМЕНЯТЬСЯ СТОРОНАМИ" Command="{Binding FlipSidesCommand}"/>
+                            <Grid x:Name="_grid_options_white_time" Grid.Row="1" Margin="15 0 25 0" Visibility="Collapsed">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -603,13 +603,13 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Время белых:" Foreground="White" TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" 
                                            FontSize="13"/>
-                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=slider_white_time, Path=Value, Converter={StaticResource time_converter}}" Margin="5 0 0 0" Foreground="White" 
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=_slider_white_time, Path=Value, Converter={StaticResource TimeConverter}}" Margin="5 0 0 0" Foreground="White" 
                                            TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="13"/>
                                 </Grid>
-                                <Slider x:Name="slider_white_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
+                                <Slider x:Name="_slider_white_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
                                     SmallChange="30" LargeChange="30" TickFrequency="30" Minimum="30" Background="#312E2B"/>
                             </Grid>
-                            <Grid x:Name="grid_options_black_time" Grid.Row="2" Margin="15 0 25 0" Visibility="Collapsed">
+                            <Grid x:Name="_grid_options_black_time" Grid.Row="2" Margin="15 0 25 0" Visibility="Collapsed">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -621,22 +621,22 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Время черных:" Foreground="White" TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" 
                                            FontSize="13"/>
-                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=slider_black_time, Path=Value, Converter={StaticResource time_converter}}" Margin="5 0 0 0" Foreground="White" 
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ElementName=_slider_black_time, Path=Value, Converter={StaticResource TimeConverter}}" Margin="5 0 0 0" Foreground="White" 
                                            TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="13"/>
                                 </Grid>
-                                <Slider x:Name="slider_black_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
+                                <Slider x:Name="_slider_black_time" Value="900" Template="{StaticResource Slider}" Grid.Row="1" VerticalAlignment="Center" Maximum="86399" 
                                     SmallChange="30" LargeChange="30" TickFrequency="30" Minimum="30" Background="#312E2B"/>
                             </Grid>
                         </Grid>
                     </Border>
-                    <Border BorderThickness="1 0 0 0" BorderBrush="#312E2B" x:Name="BorderUploadGame" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" 
+                    <Border BorderThickness="1 0 0 0" BorderBrush="#312E2B" x:Name="_border_upload_game" Grid.Column="0" CornerRadius="0 25 25 0" Background="#21201E" 
                         Width="250" Visibility="Collapsed">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="70"/>
                             </Grid.RowDefinitions>
-                            <ListBox x:Name="ListBoxUploadedGames" Visibility="Collapsed" ItemsSource="{Binding Dates}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                            <ListBox x:Name="_list_box_uploaded_games" Visibility="Collapsed" ItemsSource="{Binding Dates}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
                              HorizontalContentAlignment="Stretch" SelectionMode="Single" ItemContainerStyle="{StaticResource ListBoxItemDarkStyle}" Background="Transparent">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate DataType="{x:Type ListBoxItem}">
@@ -689,7 +689,7 @@
                             </ListBox>
                             <Border Grid.Row="1" BorderThickness="0 1 0 0" BorderBrush="#312E2B">
                                 <Grid>
-                                    <Button x:Name="ButtonUploadGame" Visibility="Collapsed" Style="{StaticResource MenuButtonStyle}" Template="{StaticResource ButtonUploadGame}"
+                                    <Button x:Name="_button_upload_game" Visibility="Collapsed" Style="{StaticResource MenuButtonStyle}" Template="{StaticResource ButtonUploadGame}"
                                             Margin="10 12 10 12" Content="ЗАГРУЗИТЬ ВЫБРАННУЮ ПАРТИЮ" FontSize="11" Click="ButtonUploadGameClick">
                                     </Button>
                                 </Grid>
@@ -698,12 +698,12 @@
                     </Border>
                     <ItemsControl ItemsSource="{Binding Game.Board}"
                       HorizontalAlignment="Center"
-                      VerticalAlignment="Center" Grid.Column="1" x:Name="ItemsContolBoard">
+                      VerticalAlignment="Center" Grid.Column="1" x:Name="_items_control_board">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Command="{Binding DataContext.CellClickCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Name="Button">
                                     <Button.CommandParameter>
-                                        <MultiBinding Converter="{StaticResource cmd_multi_converter}">
+                                        <MultiBinding Converter="{StaticResource CommandMultyConverter}">
                                             <Binding ElementName="Button"/>
                                             <Binding />
                                         </MultiBinding>
@@ -720,7 +720,7 @@
                                                 </Setter.Value>
                                             </Setter>
                                             <Setter Property="Content" Value="{Binding Position}"/>
-                                            <Setter Property="Background" Value="{Binding Color, Converter={StaticResource color_converter}}"/>
+                                            <Setter Property="Background" Value="{Binding Color, Converter={StaticResource ColorConverter}}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Active}" Value="true">
                                                     <Setter Property="Background" Value="Red"/>
@@ -728,21 +728,21 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding IsPossible}" Value="true"/>
-                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="true"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource NullConverter}}" Value="true"/>
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_converter}}"/>
+                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource BackgroundConverter}}"/>
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding IsPossible}" Value="true"/>
-                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource NullConverter}}" Value="false"/>
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource background_figure_converter}}"/>
+                                                    <Setter Property="Background" Value="{Binding Color, Converter={StaticResource BackgroundFigureConverter}}"/>
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}"  Value="true"/>
-                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource null_converter}}" Value="false"/>
+                                                        <Condition Binding="{Binding Path=Figure, Converter={StaticResource NullConverter}}" Value="false"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
                                                         <Setter Property="Cursor" Value="Hand"/>
@@ -751,13 +751,13 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>
-                                    <Image Source="{Binding Path=Figure.ImagePath, Converter={StaticResource image_path_converter}}"/>
+                                    <Image Source="{Binding Path=Figure.ImagePath, Converter={StaticResource ImagePathConverter}}"/>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid x:Name="uniform_grid" Columns="8" Rows="8"/>
+                                <UniformGrid x:Name="_uniform_grid" Columns="8" Rows="8"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>

@@ -373,9 +373,9 @@ namespace ChessGame.ViewModel
         #region Конструкторы
         public ChessViewModel()
         {
-            Window window = new LoginRegistrationWindow(this);
+            Window window = new AuthorizationWindow(this);
             window.ShowDialog();
-            window = new LoginRegistrationWindow(this);
+            window = new AuthorizationWindow(this);
             window.ShowDialog();
             if (_white_player is null || _black_player is null) App.Current.MainWindow.Close();
         }
@@ -441,7 +441,7 @@ namespace ChessGame.ViewModel
         /// </summary>
         private void Board_PawnChanged(object sender, Position position, FigureColor color)
         {
-            PawnChange change_window = new PawnChange(color == FigureColor.White);
+            PawnChangeWindow change_window = new PawnChangeWindow(color == FigureColor.White);
             Point relative_location = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
             change_window.Left = relative_location.X + App.Current.MainWindow.Left + 6;
             change_window.Top = color == FigureColor.White ?

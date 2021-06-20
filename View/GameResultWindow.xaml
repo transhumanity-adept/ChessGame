@@ -11,13 +11,13 @@
         Background="#312E2B"
         Opacity="0.9"
         AllowsTransparency="True"
-        Loaded="Window_Loaded">
+        Loaded="WindowLoaded">
     <Window.Resources>
         <DropShadowEffect x:Key="shadow_effect" Color="#86db25" Direction="270" ShadowDepth="5" BlurRadius="2" Opacity="1"/>
         <FontFamily x:Key="font_family">
             Arial
         </FontFamily>
-        <Style x:Key="button_ok_style" TargetType="Button">
+        <Style x:Key="ButtonOkStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="30"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -50,7 +50,7 @@
                 <RowDefinition Height="9*"/>
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="text_block" 
+            <TextBlock x:Name="_text_block" 
                Text="ПОБЕДИЛА КОМАНДА ЧЕРНЫХ"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
@@ -63,7 +63,7 @@
                FontWeight="Bold"
                >
             </TextBlock>
-            <Button x:Name="button_close" Width="300" Height="50" IsEnabled="False" Grid.Row="1" Content="OK" Style="{StaticResource button_ok_style}" Click="Button_Click"/>
+            <Button x:Name="_button_close" Width="300" Height="50" IsEnabled="False" Grid.Row="1" Content="OK" Style="{StaticResource ButtonOkStyle}" Click="ButtonClick"/>
         </Grid>
     </Border>
 </Window>

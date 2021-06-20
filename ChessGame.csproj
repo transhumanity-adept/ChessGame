@@ -124,8 +124,8 @@
     <Compile Include="View\GameResultWindow.xaml.cs">
       <DependentUpon>GameResultWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\LoginRegistrationWindow.xaml.cs">
-      <DependentUpon>LoginRegistrationWindow.xaml</DependentUpon>
+    <Compile Include="View\AuthorizationWindow.xaml.cs">
+      <DependentUpon>AuthorizationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -135,14 +135,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\NotifyPropertyChanged.cs" />
-    <Compile Include="View\PawnChange.xaml.cs">
-      <DependentUpon>PawnChange.xaml</DependentUpon>
+    <Compile Include="View\PawnChangeWindow.xaml.cs">
+      <DependentUpon>PawnChangeWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="View\GameResultWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\LoginRegistrationWindow.xaml">
+    <Page Include="View\AuthorizationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -150,7 +150,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\PawnChange.xaml">
+    <Page Include="View\PawnChangeWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

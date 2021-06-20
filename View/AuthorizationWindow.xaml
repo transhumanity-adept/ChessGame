@@ -1,13 +1,11 @@
-﻿<Window x:Class="ChessGame.View.LoginRegistrationWindow"
+﻿<Window x:Class="ChessGame.View.AuthorizationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ChessGame.View" 
         xmlns:chess_vm_converters="clr-namespace:ChessGame.ViewModel.Converters" 
-        xmlns:chess_vm="clr-namespace:ChessGame.ViewModel"
         mc:Ignorable="d"
-        Title="LoginRegistrationWindow" Height="450" Width="1000" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
+        Title="LoginRegistrationWindow" Height="450" Width="1000" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Loaded="WindowLoaded">
     <Window.Resources>
         <chess_vm_converters:CommandParameterMultiConverter x:Key="cmd_multi_converter"/>
         <Style x:Key="LableDarkStyle" TargetType="Label">
@@ -66,8 +64,8 @@
             <RowDefinition Height="1.5*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom">
-            <Border x:Name="border_notify" CornerRadius="20" Background="#de0000" Height="50" Margin="0 0 0 10" Visibility="Hidden">
-                <Label x:Name="label_notify" Content="Неверный логин или пароль" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+            <Border x:Name="_border_notify" CornerRadius="20" Background="#de0000" Height="50" Margin="0 0 0 10" Visibility="Hidden">
+                <Label x:Name="_label_notify" Content="Неверный логин или пароль" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                        FontWeight="Normal" FontSize="21" FontFamily="Comic Sans MS" Foreground="White"/>
             </Border>
         </Grid>
@@ -87,8 +85,8 @@
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Content="Login" Style="{StaticResource LableDarkStyle}"></Label>
                 <Label Grid.Row="1" Grid.Column="0" Content="Password" Style="{StaticResource LableDarkStyle}"></Label>
-                <Border x:Name="border_login" Grid.Row="0" Grid.Column="1" Background="#3d3c38" CornerRadius="0 20 20 0" Margin="5 0 0 0" Padding="10 0 0 0" Height="55">
-                    <TextBox x:Name="text_box_login" MaxLength="15" IsKeyboardFocusedChanged="KeyboardFocusableChanged" Foreground="White" HorizontalContentAlignment="Left" 
+                <Border x:Name="_border_login" Grid.Row="0" Grid.Column="1" Background="#3d3c38" CornerRadius="0 20 20 0" Margin="5 0 0 0" Padding="10 0 0 0" Height="55">
+                    <TextBox x:Name="_text_box_login" MaxLength="15" IsKeyboardFocusedChanged="KeyboardFocusableChanged" Foreground="White" HorizontalContentAlignment="Left" 
                              VerticalContentAlignment="Center" FontSize="19" FontWeight="Medium" FontFamily="Comic Sans MS" Background="Transparent" BorderThickness="0"/>
                 </Border>
                 <TextBlock Grid.Row="0" Grid.Column="1" Background="Transparent" Text="Enter login . . ." IsHitTestVisible="False" TextAlignment="Left" VerticalAlignment="Center" 
@@ -97,18 +95,18 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName = text_box_login}" Value="">
+                                <DataTrigger Binding="{Binding Text, ElementName = _text_box_login}" Value="">
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <Border x:Name="border_password" Grid.Row="1" Grid.Column="1" Background="#3d3c38" CornerRadius="0 20 20 0" Margin="5 0 0 0" Padding="10 0 0 0" Height="55">
-                    <PasswordBox MaxLength="30" x:Name="password_box" IsKeyboardFocusedChanged="KeyboardFocusableChanged" PasswordChanged="PasswordBoxPasswordChanged" Foreground="White" HorizontalContentAlignment="Left" 
+                <Border x:Name="_border_password" Grid.Row="1" Grid.Column="1" Background="#3d3c38" CornerRadius="0 20 20 0" Margin="5 0 0 0" Padding="10 0 0 0" Height="55">
+                    <PasswordBox MaxLength="30" x:Name="_password_box" IsKeyboardFocusedChanged="KeyboardFocusableChanged" PasswordChanged="PasswordBoxPasswordChanged" Foreground="White" HorizontalContentAlignment="Left" 
                              VerticalContentAlignment="Center" FontSize="19" FontWeight="Medium" FontFamily="Comic Sans MS" Background="Transparent" BorderThickness="0"/>
                 </Border>
-                <TextBlock x:Name="text_block_password_mark" Text="Enter password . . ." Grid.Row="1" Grid.Column="1" IsHitTestVisible="False" Background="Transparent" 
+                <TextBlock x:Name="_text_block_password_mark" Text="Enter password . . ." Grid.Row="1" Grid.Column="1" IsHitTestVisible="False" Background="Transparent" 
                             TextAlignment="Left" VerticalAlignment="Center" FontFamily="Comic Sans MS" FontSize="19" Foreground="White" Padding="20 0 0 0" FontWeight="Medium" Opacity="0.5"/>
             </Grid>
             <Grid Grid.Row="1">
