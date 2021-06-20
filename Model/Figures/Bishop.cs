@@ -4,11 +4,21 @@ using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
+    /// <summary>
+    /// Шахматная фигура "Слон"
+    /// </summary>
     class Bishop : Figure
     {
+        #region Конструкторы
         public Bishop(Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteBishop : RelativePaths.BlackBishop, color) { }
+        #endregion
 
+        #region Методы
+        /// <summary>
+        /// Вычисление возможных ходов фигуры на доске
+        /// </summary>
+        /// <returns>Коллекция возможных ходов</returns>
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();
@@ -22,5 +32,6 @@ namespace ChessGame.Model.Figures
             }
             return result;
         }
+        #endregion
     }
 }

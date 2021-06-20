@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using ChessGame.Model;
+using ChessGame.Model.Helpers;
 
 namespace ChessGame.ViewModel.Converters
 {

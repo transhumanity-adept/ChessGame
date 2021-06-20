@@ -2,10 +2,21 @@
 
 namespace ChessGame.Model
 {
+    /// <summary>
+    /// Игрок
+    /// </summary>
     public class Player : NotifyPropertyChanged
     {
+        #region Поля
         private int _rating;
-        public int Rating 
+        #endregion
+
+        #region Контрукторы
+        public Player(int rating, string login) => (Rating, Login) = (rating, login);
+        #endregion
+
+        #region Свойства
+        public int Rating
         {
             get => _rating;
             set
@@ -15,6 +26,6 @@ namespace ChessGame.Model
             }
         }
         public string Login { get; }
-        public Player(int rating, string login) => (Rating, Login) = (rating, login);
+        #endregion
     }
 }

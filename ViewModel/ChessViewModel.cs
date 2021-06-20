@@ -4,7 +4,6 @@ using ChessGame.Helpers;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.View;
 using ChessGame.Model.Helpers;
-using ChessGame.ViewModel.Helpers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Data.SqlClient;
@@ -35,15 +34,13 @@ namespace ChessGame.ViewModel
         #endregion
 
         #region События
-        public delegate void ClickedCellHandled(object sender, CellClickedEventArgs e);
-        public event ClickedCellHandled ClickedOnCell;
-        public delegate void ResultOfPawnChangeObtainedHandler(object sender, ResultOfPawnChangeObtainedEventArgs e);
-        public event ResultOfPawnChangeObtainedHandler ResultOfPawnChangeObtained;
+        public event Action<object, Cell> ClickedOnCell;
+        public event Action<object, Position, FigureColor, ChangeResult> ResultOfPawnChangeObtained;
         public event Action<object, bool, string> LoginVerified;
         public event Action<object, bool, string> RegistrationVerified;
         public event Action<object, bool, string> DataWorkCompleted;
-        public event Action GameSaved;
-        public event Action<GameResult> GameIsOver;
+        public event Action<object> GameSaved;
+        public event Action<object, GameResult> GameOver;
         #endregion
 
         #region Свойства
@@ -80,7 +77,7 @@ namespace ChessGame.ViewModel
             var (obj_one, obj_two) = obj as Tuple<object, object>;
             if (!(obj_one is Button button) || !(obj_two is Cell cell)) return;
             _current_clicked_button = button;
-            ClickedOnCell?.Invoke(this, new CellClickedEventArgs(cell));
+            ClickedOnCell?.Invoke(this, cell);
         }));
         public ICommand LoginCommand => _login_command ?? (_login_command = new RelayCommand(obj =>
         {
@@ -189,7 +186,7 @@ namespace ChessGame.ViewModel
                                 SqlCommand save_command = new SqlCommand($@"INSERT INTO Games([LoginWhitePlayer], [LoginBlackPlayer], [Date], [SerializedData]) "
                                     + $@"VALUES ('{_white_player.Login}','{_black_player.Login}','{DateTime.Now:yyyy-MM-dd HH:mm:ss}','{game_state}')", connection);
                                 if(save_command.ExecuteNonQuery() > 0) 
-                                    App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Игра сохранена."); GameSaved?.Invoke();});
+                                    App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Игра сохранена."); GameSaved?.Invoke(this);});
                                 else
                                     App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, false, "Сохранение не удалось, попробуйте позже."); });
                             }
@@ -198,7 +195,7 @@ namespace ChessGame.ViewModel
                                 SqlCommand updade_command = new SqlCommand($@"UPDATE Games SET [Date] = '{DateTime.Now:yyyy-MM-dd HH:mm:ss}', [SerializedData] = '{game_state}' " 
                                     + $@"WHERE [LoginWhitePlayer] = '{_white_player.Login}' AND [LoginBlackPlayer] = '{_black_player.Login}' AND [Date] = '{Game.SaveDate:yyyy-MM-dd HH:mm:ss}'", connection);
                                 if (updade_command.ExecuteNonQuery() > 0)
-                                    App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Данные о игре обновлены."); GameSaved?.Invoke(); });
+                                    App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Данные о игре обновлены."); GameSaved?.Invoke(this); });
                                 else
                                     App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, false, "Обновление данных не удалось, попробуйте позже."); });
                             }
@@ -277,9 +274,9 @@ namespace ChessGame.ViewModel
                                     App.Current.Dispatcher.Invoke(() => 
                                     {
                                         Game game = new Game(game_save_date, this, game_info);
-                                        game.GameOver += GameOver;
+                                        game.GameOver += GameGameOver;
                                         game.EventsDetached += GameEventsDetached;
-                                        game.Board.PawnChanged += Board_PawnChanged;
+                                        game.Board.PawnChangedResult += Board_PawnChanged;
                                         Game = game;
                                         DataWorkCompleted?.Invoke(this, true, "Игра загружена");
                                     });
@@ -300,9 +297,9 @@ namespace ChessGame.ViewModel
             var (obj_one, obj_two) = obj as Tuple<object, object>;
             if (!(obj_one is double white_seconds) || !(obj_two is double black_seconds)) return;
             Game game = new Game(DateTime.MinValue, this, (int)white_seconds, (int)black_seconds);
-            game.GameOver += GameOver;
+            game.GameOver += GameGameOver;
             game.EventsDetached += GameEventsDetached;
-            game.Board.PawnChanged += Board_PawnChanged;
+            game.Board.PawnChangedResult += Board_PawnChanged;
             Game = game;
         }));
         public ICommand GiveUpCommand => _give_up_command ?? (_give_up_command = new RelayCommand(obj => 
@@ -348,7 +345,7 @@ namespace ChessGame.ViewModel
                                 {
                                     losed_player.Rating -= 25;
                                     winning_player.Rating += 25;
-                                    GameIsOver?.Invoke(game_result); 
+                                    GameOver?.Invoke(this, game_result); 
                                 });
                             }
                             else
@@ -364,7 +361,7 @@ namespace ChessGame.ViewModel
         }));
         public ICommand EndDrawCommand => _end_graw_command ?? (_end_graw_command = new RelayCommand(obj => 
         {
-            GameIsOver?.Invoke(GameResult.Draw);
+            GameOver?.Invoke(this, GameResult.Draw);
         }));
         public ICommand FlipSidesCommand => _flip_sides_command ?? (_flip_sides_command = new RelayCommand(obj => 
         {
@@ -389,24 +386,24 @@ namespace ChessGame.ViewModel
             App.Current.Dispatcher.Invoke(new Action(() =>
             {
                 if (Game == null) return;
-                Game.GameOver -= GameOver;
+                Game.GameOver -= GameGameOver;
                 Game.EventsDetached -= GameEventsDetached;
-                Game.Board.PawnChanged -= Board_PawnChanged;
+                Game.Board.PawnChangedResult -= Board_PawnChanged;
                 Game = null;
             }));
         }
-        private void GameOver(object sender, GameOverEventArgs e)
+        private void GameGameOver(object sender, GameResult game_result)
         {
             App.Current.Dispatcher.Invoke(new Action(() =>
             {
                 if (Game == null) return;
                 if (Game.SaveDate != DateTime.MinValue) RemoveGameFromDataBase(Game.SaveDate, _white_player.Login, _black_player.Login);
-                Game.GameOver -= GameOver;
-                Game.Board.PawnChanged -= Board_PawnChanged;
+                Game.GameOver -= GameGameOver;
+                Game.Board.PawnChangedResult -= Board_PawnChanged;
                 Game = null;
                 var main_window = App.Current.MainWindow;
-                GameResultWindow game_result = new GameResultWindow(e.GameResult);
-                game_result.ShowDialog();
+                GameResultWindow game_result_window = new GameResultWindow(game_result);
+                game_result_window.ShowDialog();
             }));
         }
         private void RemoveGameFromDataBase(DateTime save_date, string white_player_login, string black_player_login)
@@ -426,7 +423,7 @@ namespace ChessGame.ViewModel
                         {
                             SqlCommand remove_command = new SqlCommand($@"DELETE FROM Games WHERE [LoginWhitePlayer] = '{white_player_login}' AND [LoginBlackPlayer] = '{black_player_login}' AND [Date] = '{save_date:yyyy-MM-dd HH:mm:ss}'", connection);
                             if (remove_command.ExecuteNonQuery() > 0)
-                                App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Данные о игре обновлены."); GameSaved?.Invoke(); });
+                                App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, true, "Данные о игре обновлены."); GameSaved?.Invoke(this); });
                             else
                                 App.Current.Dispatcher.Invoke(() => { DataWorkCompleted?.Invoke(this, false, "Обновление данных не удалось, попробуйте позже."); });
                         }
@@ -442,19 +439,19 @@ namespace ChessGame.ViewModel
         /// <summary>
         /// Обработка события "Смена пешки"
         /// </summary>
-        private void Board_PawnChanged(object sender, PawnChangedEventArgs e)
+        private void Board_PawnChanged(object sender, Position position, FigureColor color)
         {
-            PawnChange change_window = new PawnChange(e.Color == FigureColor.White);
+            PawnChange change_window = new PawnChange(color == FigureColor.White);
             Point relative_location = _current_clicked_button.TranslatePoint(new Point(0, 0), App.Current.MainWindow);
             change_window.Left = relative_location.X + App.Current.MainWindow.Left + 6;
-            change_window.Top = e.Color == FigureColor.White ?
+            change_window.Top = color == FigureColor.White ?
                 relative_location.Y + App.Current.MainWindow.Top + 30 :
                 relative_location.Y + App.Current.MainWindow.Top + 30 - _current_clicked_button.ActualHeight * 3;
             change_window.Width = _current_clicked_button.ActualWidth + 3;
             change_window.Height = _current_clicked_button.ActualHeight * 4;
             change_window.ShowDialog();
             ChangeResult result = change_window.ChangeResult;
-            ResultOfPawnChangeObtained?.Invoke(this, new ResultOfPawnChangeObtainedEventArgs(e.Position, e.Color, result));
+            ResultOfPawnChangeObtained?.Invoke(this, position, color, result);
         }
     }
 }

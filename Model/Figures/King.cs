@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.Helpers;
+using System;
 
 namespace ChessGame.Model.Figures
 {
+    /// <summary>
+    /// Шахматная фигура "Король"
+    /// </summary>
     class King : Figure
     {
+        #region Конструкторы
         public King(Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteKing : RelativePaths.BlackKing, color) 
         {
@@ -18,10 +23,26 @@ namespace ChessGame.Model.Figures
             MovementsState = movement_state;
             HasCastle = has_castle;
         }
-        public delegate void CastlingHandler(object sender, CastlingEventArgs e);
-        public event CastlingHandler ToCastled;
+        #endregion
+
+        #region Свойства
         public MovementsState MovementsState { get; private set; }
         public bool HasCastle { get; set; }
+        #endregion
+
+        #region События
+        /// <summary>
+        /// Событие "Рокировка"
+        /// </summary>
+        public event Action<object, Position, Position, Position, Position> ToCastled;
+        #endregion
+
+        #region Методы
+        /// <summary>
+        /// Ход фигуры
+        /// </summary>
+        /// <param name="new_position">Новая позиция</param>
+        /// <param name="count_moves">Количество ходов на доске</param>
         public override void MoveTo(Position new_position, int count_moves)
         {
             switch (MovementsState)
@@ -32,12 +53,22 @@ namespace ChessGame.Model.Figures
             HasCastle = false;
             base.MoveTo(new_position, count_moves);
         }
+        /// <summary>
+        /// Рокировка
+        /// </summary>
+        /// <param name="king_move_pos">Допустимые ходы короля</param>
+        /// <param name="rook_pos">Позиция ладьи</param>
+        /// <param name="rook_move_pos">Допустимые ходы ладьи</param>
         public void ToCastle(Position king_move_pos, Position rook_pos, Position rook_move_pos)
         {
             Position last_pos = Position;
             Position = king_move_pos;
-            ToCastled?.Invoke(this, new CastlingEventArgs(last_pos, king_move_pos, rook_pos, rook_move_pos));
+            ToCastled?.Invoke(this, last_pos, king_move_pos, rook_pos, rook_move_pos);
         }
+        /// <summary>
+        /// Вычисление возможных ходов фигуры на доске
+        /// </summary>
+        /// <returns>Коллекция возможных ходов</returns>
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();
@@ -51,9 +82,14 @@ namespace ChessGame.Model.Figures
             try { result.Add(new Position(_position.X + 1, _position.Y + 1)); } catch { }
             return result;
         }
+        /// <summary>
+        /// Информация о фигуре в виде строки
+        /// </summary>
+        /// <returns>Строковое представление фигуры</returns>
         public override string ToString()
         {
             return $"{base.ToString()} {MovementsState} {HasCastle}";
         }
+        #endregion
     }
 }

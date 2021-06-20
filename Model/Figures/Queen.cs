@@ -4,10 +4,21 @@ using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
+    /// <summary>
+    /// Шахматная фигура "Ферзь"
+    /// </summary>
     class Queen : Figure
     {
+        #region Конструкторы
         public Queen(Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteQueen : RelativePaths.BlackQueen, color) { }
+        #endregion
+
+        #region Методы
+        /// <summary>
+        /// Вычисление возможных ходов фигуры на доске
+        /// </summary>
+        /// <returns>Коллекция возможных ходов</returns>
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();
@@ -17,7 +28,7 @@ namespace ChessGame.Model.Figures
             }
             for (int i = 0; i < Position.MaxPositionY; i++)
             {
-                if(i != _position.Y) { result.Add(new Position(_position.X, i)); }
+                if (i != _position.Y) { result.Add(new Position(_position.X, i)); }
             }
             for (int i = 0; i < Position.MaxPositionX; i++)
             {
@@ -29,5 +40,7 @@ namespace ChessGame.Model.Figures
             }
             return result;
         }
+
+        #endregion
     }
 }

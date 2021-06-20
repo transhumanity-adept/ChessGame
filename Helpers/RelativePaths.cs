@@ -1,10 +1,12 @@
-﻿using System;
-using System.IO;
-
+﻿using System.IO;
 namespace ChessGame.Helpers
 {
+    /// <summary>
+    /// Класс содержащий относительные пути к файлам проекта
+    /// </summary>
     static class RelativePaths
     {
+        #region Свойства
         public static string WhiteQueen { get; } = @"pack://application:,,,/ChessGame;component/Images/wqueen.png";
         public static string BlackQueen { get; } = @"pack://application:,,,/ChessGame;component/Images/bqueen.png";
         public static string WhiteKing { get; } = @"pack://application:,,,/ChessGame;component/Images/wking.png";
@@ -18,5 +20,6 @@ namespace ChessGame.Helpers
         public static string WhitePawn { get; } = @"pack://application:,,,/ChessGame;component/Images/wpawn.png";
         public static string BlackPawn { get; } = @"pack://application:,,,/ChessGame;component/Images/bpawn.png";
         public static string DataBaseConnection { get; } = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).FullName).FullName}\Model\Data\ChessGameData.mdf;Integrated Security=True";
+        #endregion
     }
 }

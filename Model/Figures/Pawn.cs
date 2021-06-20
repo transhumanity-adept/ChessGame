@@ -5,17 +5,17 @@ using ChessGame.Helpers;
 
 namespace ChessGame.Model.Figures
 {
+    /// <summary>
+    /// Шахматная фигура "Пешка"
+    /// </summary>
     class Pawn : Figure
     {
-        public MovementsState MovementsState { get; private set; }
-        public bool HasEnPassant { get; set; }
-        public int EnPassantNumberMove { get; set; }
-        public Pawn(Position position, FigureColor color) 
+        #region Конструкторы
+        public Pawn(Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
         {
             MovementsState = MovementsState.Zero;
         }
-
         public Pawn(Position position, FigureColor color, MovementsState movement_state, bool has_en_passant, int en_passant_number_move)
             : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
         {
@@ -23,47 +23,71 @@ namespace ChessGame.Model.Figures
             HasEnPassant = has_en_passant;
             EnPassantNumberMove = en_passant_number_move;
         }
+        #endregion
 
-        public delegate void EnPassantHandler(object sender, EnPassantedEventArgs e);
-        public event EnPassantHandler EnPassanted;
-        public event EventHandler Changed;
+        #region Свойства
+        public MovementsState MovementsState { get; private set; }
+        public bool HasEnPassant { get; set; }
+        public int EnPassantNumberMove { get; set; }
+        #endregion
 
+        #region События
+        public event Action<object, Position, Position, Position> EnPassanted;
+        public event Action<object> Changed;
+        #endregion
+
+        #region Методы
+        /// <summary>
+        /// Атака на клетку доски
+        /// </summary>
+        /// <param name="attack_position">Атакуемая позиция на доске</param>
         public override void AttackTo(Position attack_position)
         {
             base.AttackTo(attack_position);
             if (Position.X == (_color == FigureColor.White ? 7 : 0))
             {
-                Changed?.Invoke(this, new EventArgs());
+                Changed?.Invoke(this);
             }
         }
+        /// <summary>
+        /// Ход фигуры
+        /// </summary>
+        /// <param name="new_position">Новая позиция</param>
+        /// <param name="count_moves">Количество ходов на доске</param>
         public override void MoveTo(Position new_position, int count_moves)
         {
             switch (MovementsState)
             {
-                case MovementsState.Zero : { MovementsState = MovementsState.One; break; }
+                case MovementsState.Zero: { MovementsState = MovementsState.One; break; }
                 case MovementsState.One: { MovementsState = MovementsState.More; break; }
             }
             if (Math.Abs(new_position.X - _position.X) == 2) EnPassantNumberMove = count_moves;
             base.MoveTo(new_position, count_moves);
             if (Position.X == (_color == FigureColor.White ? 7 : 0))
             {
-                Changed?.Invoke(this, new EventArgs());
+                Changed?.Invoke(this);
             }
         }
-
+        /// <summary>
+        /// Атака с взятием на проходе
+        /// </summary>
+        /// <param name="en_passanted_figure_position">Позиция атакуемой фигуры</param>
         public void EnPassantAttack(Position en_passanted_figure_position)
         {
             Position last_pos = Position;
             Position = Color == FigureColor.White ?
                 new Position(en_passanted_figure_position.X + 1, en_passanted_figure_position.Y) :
                 new Position(en_passanted_figure_position.X - 1, en_passanted_figure_position.Y);
-            EnPassanted?.Invoke(this, new EnPassantedEventArgs(last_pos, en_passanted_figure_position, Position));
+            EnPassanted?.Invoke(this, last_pos, en_passanted_figure_position, Position);
         }
-
+        /// <summary>
+        /// Вычисление возможных ходов фигуры на доске
+        /// </summary>
+        /// <returns>Коллекция возможных ходов</returns>
         public override List<Position> GetPossibleMoves()
         {
             List<Position> result = new List<Position>();
-            if(_color == FigureColor.White)
+            if (_color == FigureColor.White)
             {
                 if (Position.X != 7)
                 {
@@ -79,9 +103,14 @@ namespace ChessGame.Model.Figures
             }
             return result;
         }
+        /// <summary>
+        /// Информация о фигуре в виде строки
+        /// </summary>
+        /// <returns>Строковое представление фигуры</returns>
         public override string ToString()
         {
             return $"{base.ToString()} {MovementsState} {HasEnPassant} {EnPassantNumberMove}";
         }
+        #endregion
     }
 }

@@ -8,20 +8,10 @@ using ChessGame.Model.Figures;
 using ChessGame.Model.Figures.Helpers;
 using ChessGame.ViewModel;
 using ChessGame.Model.Helpers;
-using ChessGame.ViewModel.Helpers;
-using System.Windows;
 using System.Threading.Tasks;
 
 namespace ChessGame.Model
 {
-    static class CheckmateCache
-    {
-        public static List<(Figure figure, List<Position> possible_moves)> CachedMoves { get; set; } = new List<(Figure figure, List<Position> possible_moves)>();
-        public static void Clear()
-        {
-            CachedMoves.Clear();
-        }
-    }
     public class Board : NotifyPropertyChanged, IEnumerable<Cell>
     {
         #region Поля
@@ -32,36 +22,27 @@ namespace ChessGame.Model
         private readonly Game _game;
         #endregion
 
-        #region индексаторы
-        public Cell this[int row, int column]
-        {
-            get => _cells[row, column];
-            set => _cells[row, column] = value;
-        }
-        #endregion
-
         #region Конструкторы
         public Board()
         {
             BoardStartSetup();
-            _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += Figure_Moved; e.Attacked += Figure_Attacked; } });
+            _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += FigureMoved; e.Attacked += FigureAttacked; } });
         }
         public Board(Game game, ChessViewModel view_model) : this()
         {
             game.GameOver += GameGameOver;
             view_model.GameSaved += VMGameSaved;
-            view_model.GameIsOver += VMGameIsOver;
+            view_model.GameOver += VMGameOver;
             view_model.ClickedOnCell += ClickedOnCell;
             view_model.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
             _game = game;
             _chess_vm = view_model;
         }
-
         public Board(Game game, ChessViewModel view_model, string restore_state_info)
         {
             game.GameOver += GameGameOver;
             view_model.GameSaved += VMGameSaved;
-            view_model.GameIsOver += VMGameIsOver;
+            view_model.GameOver += VMGameOver;
             view_model.ClickedOnCell += ClickedOnCell;
             view_model.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
             _game = game;
@@ -70,17 +51,8 @@ namespace ChessGame.Model
         }
         #endregion
 
-        #region События
-        public delegate void PawnChangedHandler(object sender, PawnChangedEventArgs e);
-        public event PawnChangedHandler PawnChanged;
-        public delegate void GameOverHandler(object sender, GameOverEventArgs e);
-        public event GameOverHandler GameOver;
-        public event Action EventsDetached;
-        #endregion
-
         #region Свойства
         public int CountMoves { get; private set; } = 0;
-
         public FigureColor CurrentMoveColor
         {
             get => _current_move_color;
@@ -91,63 +63,104 @@ namespace ChessGame.Model
             }
         }
         #endregion
-        private void GameGameOver(object sender, GameOverEventArgs e)
+
+        #region индексаторы
+        public Cell this[int row, int column]
+        {
+            get => _cells[row, column];
+            set => _cells[row, column] = value;
+        }
+        #endregion
+
+        #region События
+        /// <summary>
+        /// Событие "Получен результат изменения пешки"
+        /// </summary>
+        public event Action<object, Position, FigureColor> PawnChangedResult;
+        /// <summary>
+        /// Событие "Игра окончена"
+        /// </summary>
+        public event Action<object, GameResult> GameOver;
+        /// <summary>
+        /// Событие "Подписки на события обнулены"
+        /// </summary>
+        public event Action<object> EventsDetached;
+        #endregion
+
+        #region Методы
+        /// <summary>
+        /// Обработчик события "Игра окончена", источник Game
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        /// <param name="game_result">Результат игры</param>
+        private void GameGameOver(object sender, GameResult game_result)
         {
             CheckmateCache.Clear();
             _chess_vm.ClickedOnCell -= ClickedOnCell;
             _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
             _game.GameOver -= GameGameOver;
         }
-
-        private void VMGameIsOver(GameResult game_result)
-        {
-            CheckmateCache.Clear();
-            _chess_vm.ClickedOnCell -= ClickedOnCell;
-            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-            GameOver?.Invoke(this, new GameOverEventArgs(game_result));
-        }
-
-        private void VMGameSaved()
-        {
-            CheckmateCache.Clear();
-            _chess_vm.ClickedOnCell -= ClickedOnCell;
-            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-            EventsDetached?.Invoke();
-        }
-
         /// <summary>
-        /// Обработка результата выбора игроком фигуры вместо пешки, дошедшей до границы доски.
+        /// Обработчик события "Игра окончена", источник VM
         /// </summary>
-        private void ResultOfPawnChangeObtained(object sender, ResultOfPawnChangeObtainedEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="game_result">Результат игры</param>
+        private void VMGameOver(object sender, GameResult game_result)
+        {
+            CheckmateCache.Clear();
+            _chess_vm.ClickedOnCell -= ClickedOnCell;
+            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+            GameOver?.Invoke(this, game_result);
+        }
+        /// <summary>
+        /// Обработчик события "Игра сохранена"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        private void VMGameSaved(object sender)
+        {
+            CheckmateCache.Clear();
+            _chess_vm.ClickedOnCell -= ClickedOnCell;
+            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+            EventsDetached?.Invoke(this);
+        }
+        /// <summary>
+        /// Обрабочтик события "Результат смены пешки получен"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        /// <param name="figure_position">Позиция фигуры</param>
+        /// <param name="figure_color">Цвет фигуры</param>
+        /// <param name="change_result">Результирующая фигура</param>
+        private void ResultOfPawnChangeObtained(object sender, Position figure_position, FigureColor figure_color, ChangeResult change_result)
         {
             Figure figure = null;
-            switch (e.ChangeResult)
+            switch (change_result)
             {
-                case ChangeResult.Queen: { figure = new Queen(e.FigurePosition, e.FigureColor); break; }
-                case ChangeResult.Bishop: { figure = new Bishop(e.FigurePosition, e.FigureColor); break; }
-                case ChangeResult.Knight: { figure = new Knight(e.FigurePosition, e.FigureColor); break; }
-                case ChangeResult.Rook: { figure = new Rook(e.FigurePosition, e.FigureColor); break; }
+                case ChangeResult.Queen: { figure = new Queen(figure_position, figure_color); break; }
+                case ChangeResult.Bishop: { figure = new Bishop(figure_position, figure_color); break; }
+                case ChangeResult.Knight: { figure = new Knight(figure_position, figure_color); break; }
+                case ChangeResult.Rook: { figure = new Rook(figure_position, figure_color); break; }
             }
-            figure.Moved += Figure_Moved;
-            figure.Attacked += Figure_Attacked;
-            GetCellInPosition(e.FigurePosition).Figure = figure;
+            figure.Moved += FigureMoved;
+            figure.Attacked += FigureAttacked;
+            GetCellInPosition(figure_position).Figure = figure;
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
                 {
-                    if (_figures[i, j] != null && _figures[i, j].Position == e.FigurePosition) _figures[i, j] = figure;
+                    if (_figures[i, j] != null && _figures[i, j].Position == figure_position) _figures[i, j] = figure;
                 }
             }
             Checkmate();
             ReverseCurrentMoveColor();
         }
-
         /// <summary>
-        /// Обработка события "Клик по ячейке"
+        /// Обработчик события "Клик по клетке доски"
         /// </summary>
-        private void ClickedOnCell(object sender, CellClickedEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="cell">Клетка доски</param>
+        private void ClickedOnCell(object sender, Cell cell)
         {
-            Cell clicked_cell = e.ClickedCell;
+            Cell clicked_cell = cell;
             Cell active_cell = _cells.Cast<Cell>().FirstOrDefault(c => c.Active);
             if (active_cell is null)
             {
@@ -265,51 +278,57 @@ namespace ChessGame.Model
                 }
             }
         }
-
         /// <summary>
-        /// Обработка события "Пешка дошла до границы доски"
+        /// Обработчик события "Пешка дошла до границы доски"
         /// </summary>
-        private void Pawn_Changed(object sender, EventArgs e)
+        /// <param name="sender">Источник события</param>
+        private void PawnChanged(object sender)
         {
             if (!(sender is Figure)) return;
             Figure figure = (Figure)sender;
-            PawnChanged?.Invoke(this, new PawnChangedEventArgs(figure.Position, figure.Color));
+            PawnChangedResult?.Invoke(this, figure.Position, figure.Color);
         }
-
         /// <summary>
-        /// Обработка события "Рокировка"
+        /// Обработчик события "Рокировка"
         /// </summary>
-        private void King_ToCastled(object sender, CastlingEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="king_position">Позиция короля</param>
+        /// <param name="king_movable_position">Позиция на которую перемещается король</param>
+        /// <param name="rook_position">Позиция ладьи</param>
+        /// <param name="rook_movable_position">Позиция на которую перемещается ладья</param>
+        private void KingToCastled(object sender, Position king_position, Position king_movable_position, Position rook_position, Position rook_movable_position)
         {
             if (!(sender is King)) return;
             King king = (King)sender;
-            Rook rook = GetCellInPosition(e.RookPosition).Figure as Rook;
-            rook.Position = e.RookMovablePosition;
-            GetCellInPosition(e.KingPosition).Figure = null;
-            GetCellInPosition(e.KingMovablePosition).Figure = king;
-            GetCellInPosition(e.RookPosition).Figure = null;
-            GetCellInPosition(e.RookMovablePosition).Figure = rook;
+            Rook rook = GetCellInPosition(rook_position).Figure as Rook;
+            rook.Position = rook_movable_position;
+            GetCellInPosition(king_position).Figure = null;
+            GetCellInPosition(king_movable_position).Figure = king;
+            GetCellInPosition(rook_position).Figure = null;
+            GetCellInPosition(rook_movable_position).Figure = rook;
             king.HasCastle = false;
             ReverseCurrentMoveColor();
             Checkmate();
         }
-
         /// <summary>
-        /// Обработка события "Взятие на проходе"
+        /// Обработчик события "Взятие на проходе"
         /// </summary>
-        private void Pawn_EnPassanted(object sender, EnPassantedEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="attacking_figure_position">Позиция атакующей фигуры</param>
+        /// <param name="position_figure_begin_attacked">Позиция атакуемой фигуры</param>
+        /// <param name="end_passant_position">Окончательная позиция атакующей фигуры</param>
+        private void PawnEnPassanted(object sender, Position attacking_figure_position, Position position_figure_begin_attacked, Position end_passant_position)
         {
             if (!(sender is Pawn)) return;
             Pawn attacking_figure = (Pawn)sender;
-            Figure attacked_figure = GetCellInPosition(e.PositionFigureBeginAttacked).Figure;
-            (GetCellInPosition(e.EndPassantPosition)).Figure = attacking_figure;
-            (GetCellInPosition(e.AttackingFigurePosition)).Figure = null;
-            (GetCellInPosition(e.PositionFigureBeginAttacked)).Figure = null;
+            Figure attacked_figure = GetCellInPosition(position_figure_begin_attacked).Figure;
+            GetCellInPosition(end_passant_position).Figure = attacking_figure;
+            GetCellInPosition(attacking_figure_position).Figure = null;
+            GetCellInPosition(position_figure_begin_attacked).Figure = null;
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
                 {
-                    //if (_figures[i, j] == attacking_figure) _figures[i, j] = null;
                     if (_figures[i, j] == attacked_figure) _figures[i, j] = null;
                 }
             }
@@ -318,21 +337,23 @@ namespace ChessGame.Model
             ReverseCurrentMoveColor();
             Checkmate();
         }
-
         /// <summary>
-        /// Обработка события "Фигура атакует"
+        /// Обработчик события "Фигура атакует"
         /// </summary>
-        private void Figure_Attacked(object sender, FigureEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="attacked_from">Позиция атакующей фигуры</param>
+        /// <param name="attacked_to">Позиция атаки</param>
+        private void FigureAttacked(object sender, Position attacked_from, Position attacked_to)
         {
             if (!(sender is Figure)) return;
             Figure current_figure = (Figure)sender;
-            Cell from = GetCellInPosition(e.MovedFrom);
-            Cell to = GetCellInPosition(e.MovedTo);
+            Cell from = GetCellInPosition(attacked_from);
+            Cell to = GetCellInPosition(attacked_to);
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
                 {
-                    if (_figures[i,j] != null && _figures[i,j] != current_figure && _figures[i, j].Position == e.MovedTo ) _figures[i, j] = null;
+                    if (_figures[i,j] != null && _figures[i,j] != current_figure && _figures[i, j].Position == attacked_to) _figures[i, j] = null;
                 }
             }
             from.Figure = null;
@@ -344,16 +365,18 @@ namespace ChessGame.Model
                 Checkmate();
             }
         }
-
         /// <summary>
-        /// Обработка события "Передвижение фигуры"
+        /// Обработчик события "Передвижение фигуры"
         /// </summary>
-        private void Figure_Moved(object sender, FigureEventArgs e)
+        /// <param name="sender">Источник события</param>
+        /// <param name="moved_from">Позиция передвигающейся фигуры</param>
+        /// <param name="moved_to">Позиция передвижения</param>
+        private void FigureMoved(object sender, Position moved_from, Position moved_to)
         {
             if (!(sender is Figure)) return;
             Figure current_figure = (Figure)sender;
-            Cell from = GetCellInPosition(e.MovedFrom);
-            Cell to = GetCellInPosition(e.MovedTo);
+            Cell from = GetCellInPosition(moved_from);
+            Cell to = GetCellInPosition(moved_to);
             from.Figure = null;
             to.Figure = current_figure;
             CountMoves++;
@@ -363,7 +386,6 @@ namespace ChessGame.Model
                 Checkmate();
             }
         }
-
         /// <summary>
         /// Кэширование возможных ходов с проверкой на мат
         /// </summary>
@@ -453,7 +475,7 @@ namespace ChessGame.Model
                         CheckmateCache.Clear();
                         _chess_vm.ClickedOnCell -= ClickedOnCell;
                         _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-                        GameOver.Invoke(this, new GameOverEventArgs(GameResult.BlackWin));
+                        GameOver.Invoke(this, GameResult.BlackWin);
                         return;
                     }
                 }
@@ -464,7 +486,7 @@ namespace ChessGame.Model
                         CheckmateCache.Clear();
                         _chess_vm.ClickedOnCell -= ClickedOnCell;
                         _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-                        GameOver.Invoke(this, new GameOverEventArgs(GameResult.Draw));
+                        GameOver.Invoke(this, GameResult.Draw);
                     }
                 }
             }
@@ -539,7 +561,7 @@ namespace ChessGame.Model
                         CheckmateCache.Clear();
                         _chess_vm.ClickedOnCell -= ClickedOnCell;
                         _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-                        GameOver.Invoke(this, new GameOverEventArgs(GameResult.WhiteWin));
+                        GameOver.Invoke(this, GameResult.WhiteWin);
                     }
                 }
                 else
@@ -549,26 +571,29 @@ namespace ChessGame.Model
                         CheckmateCache.Clear();
                         _chess_vm.ClickedOnCell -= ClickedOnCell;
                         _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-                        GameOver.Invoke(this, new GameOverEventArgs(GameResult.Draw));
+                        GameOver.Invoke(this, GameResult.Draw);
                     }
                 }
             }
             CheckmateCache.CachedMoves.AddRange(white_possible_moves);
             CheckmateCache.CachedMoves.AddRange(black_possible_moves);
         }
-
         /// <summary>
         /// Получить все фигуры в позициях
         /// </summary>
+        /// <param name="positions">Список позиций</param>
+        /// <returns>Список фигур находящихся на позиция</returns>
         private List<Figure> GetFiguresInPositions(List<Position> positions)
         {
             List<Figure> figures = _figures.Cast<Figure>().Where(e => e != null).ToList();
             return positions.Select(e => figures.Find(f => f.Position == e)).Where(e => e != null).ToList();
         }
-
         /// <summary>
         /// Получить все позиции между двумя позициями
         /// </summary>
+        /// <param name="p1">Первая позиция</param>
+        /// <param name="p2">Вторая позиция</param>
+        /// <returns>Список позиций, находящихся между первой и второй позициями</returns>
         private List<Position> GetPositionBetween(Position p1, Position p2)
         {
             List<Position> result = new List<Position>();
@@ -631,7 +656,6 @@ namespace ChessGame.Model
             }
             return result;
         }
-
         /// <summary>
         /// Начальная конфигурация доски
         /// </summary>
@@ -650,10 +674,10 @@ namespace ChessGame.Model
             {
                 Pawn black_pawn = new Pawn(new Position(6, i), FigureColor.Black);
                 Pawn white_pawn = new Pawn(new Position(1, i), FigureColor.White);
-                black_pawn.EnPassanted += Pawn_EnPassanted;
-                white_pawn.EnPassanted += Pawn_EnPassanted;
-                black_pawn.Changed += Pawn_Changed;
-                white_pawn.Changed += Pawn_Changed;
+                black_pawn.EnPassanted += PawnEnPassanted;
+                white_pawn.EnPassanted += PawnEnPassanted;
+                black_pawn.Changed += PawnChanged;
+                white_pawn.Changed += PawnChanged;
                 _figures[1, i] = black_pawn;
                 _figures[2, i] = white_pawn;
                 _cells[1, i].Figure = black_pawn;
@@ -661,8 +685,8 @@ namespace ChessGame.Model
             }
             King black_king = new King(new Position(7, 4), FigureColor.Black);
             King white_king = new King(new Position(0, 4), FigureColor.White);
-            black_king.ToCastled += King_ToCastled;
-            white_king.ToCastled += King_ToCastled;
+            black_king.ToCastled += KingToCastled;
+            white_king.ToCastled += KingToCastled;
 
             _figures[0, 0] = new Rook(new Position(7, 0), FigureColor.Black);
             _figures[0, 1] = new Knight(new Position(7, 1), FigureColor.Black);
@@ -688,7 +712,10 @@ namespace ChessGame.Model
                 _cells[7, i].Figure = _figures[3, i];
             }
         }
-
+        /// <summary>
+        /// Восстановление состояния доски
+        /// </summary>
+        /// <param name="restore_state_info">Информация о состоянии доски в виде строки</param>
         private void RestoreState(string restore_state_info)
         {
             for (int i = 0; i < _cells.GetLength(0); i++)
@@ -755,8 +782,8 @@ namespace ChessGame.Model
                                 bool has_en_passant = bool.Parse(figure_info[4]);
                                 int en_passant_number_move = int.Parse(figure_info[5]);
                                 Pawn figure = new Pawn(figure_pos, figure_color, movement_state, has_en_passant, en_passant_number_move);
-                                figure.EnPassanted += Pawn_EnPassanted;
-                                figure.Changed += Pawn_Changed;
+                                figure.EnPassanted += PawnEnPassanted;
+                                figure.Changed += PawnChanged;
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
                                 cell.Figure = figure;
@@ -767,7 +794,7 @@ namespace ChessGame.Model
                                 MovementsState movement_state = (MovementsState)Enum.Parse(typeof(MovementsState), figure_info[3]);
                                 bool has_castle = bool.Parse(figure_info[4]);
                                 King figure = new King(figure_pos, figure_color, movement_state, has_castle);
-                                figure.ToCastled += King_ToCastled;
+                                figure.ToCastled += KingToCastled;
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
                                 cell.Figure = figure;
@@ -776,12 +803,12 @@ namespace ChessGame.Model
                     }
                 }
             }
-            _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += Figure_Moved; e.Attacked += Figure_Attacked; } });
+            _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += FigureMoved; e.Attacked += FigureAttacked; } });
         }
-
         /// <summary>
-        /// Добавление возможных ходов на доске
+        /// Добавление возможных ходов выбранной фигуры на доску
         /// </summary>
+        /// <param name="possible_positions">Список возможных ходов</param>
         private void AddPossibleMoves(List<Position> possible_positions)
         {
             foreach (Position position in possible_positions)
@@ -793,9 +820,8 @@ namespace ChessGame.Model
                 }
             }
         }
-
         /// <summary>
-        /// Удаление возможных ходов
+        /// Сбрасывание возможных ходов выбранной фигуры
         /// </summary>
         private void ResetPossibleMoves()
         {
@@ -807,16 +833,18 @@ namespace ChessGame.Model
                 }
             }
         }
-
         /// <summary>
-        /// Получить ячейку в позиции
+        /// Получить клетку доски в позиции
         /// </summary>
+        /// <param name="position">Позиция</param>
+        /// <returns>Клетка доски</returns>
         private Cell GetCellInPosition(Position position)
             => _cells.Cast<Cell>().First(e => e.Position == position);
-
         /// <summary>
-        /// Фильтрация возможных ходов фигуры
+        /// Получить отфильтрованные возможные ходы фигуры с учетом ситуации на доске
         /// </summary>
+        /// <param name="figure">Фигура</param>
+        /// <returns>Список возможных ходов</returns>
         private List<Position> GetFiltredPossiblePositions(Figure figure)
         {
             FigureColor figure_color = figure.Color;
@@ -1003,7 +1031,6 @@ namespace ChessGame.Model
 
             return tmp_pos;
         }
-
         /// <summary>
         /// Изменить цвет текущего хода на противоположный.
         /// </summary>
@@ -1015,19 +1042,26 @@ namespace ChessGame.Model
                 case FigureColor.Black: { CurrentMoveColor = FigureColor.White; break; }
             }
         }
-
-        #region Реализация интерфейса IEnumerable<Cell>
+        /// <summary>
+        /// Получить итератор, параметризированный классом Cell
+        /// </summary>
+        /// <returns>Итератор</returns>
         public IEnumerator<Cell> GetEnumerator()
         {
             return _cells.Cast<Cell>().GetEnumerator();
         }
-
+        /// <summary>
+        /// Получить итератор
+        /// </summary>
+        /// <returns>Итератор</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _cells.GetEnumerator();
         }
-        #endregion
-
+        /// <summary>
+        /// Информация о доске в виде строки
+        /// </summary>
+        /// <returns>Строковое представление доски</returns>
         public override string ToString()
         {
             var figures = _figures.Cast<Figure>().ToList();
@@ -1044,5 +1078,6 @@ namespace ChessGame.Model
             }));
             return $"{CurrentMoveColor}*{CountMoves}*{figure_info}";
         }
+        #endregion
     }
 }

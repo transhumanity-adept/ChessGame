@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using ChessGame.Model;
+using ChessGame.Model.Helpers;
 
 namespace ChessGame.ViewModel.Converters
 {

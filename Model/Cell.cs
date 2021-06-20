@@ -1,21 +1,27 @@
 ﻿using ChessGame.Helpers;
+using ChessGame.Model.Helpers;
 
 namespace ChessGame.Model
 {
-    public enum CellColors
-    {
-        White = 1,
-        Black
-    }
-
+    /// <summary>
+    /// Клетка доски
+    /// </summary>
     public class Cell : NotifyPropertyChanged
     {
+        #region Поля
         private bool _active;
         private CellColors _color;
         private Figure _figure;
         private Position _position;
         private bool _is_possible;
+        #endregion
 
+        #region Конструкторы
+        public Cell(CellColors color, bool active, Position position)
+            => (Color, Active, Position) = (color, active, position);
+        #endregion
+
+        #region Свойства
         public bool Active
         {
             get => _active;
@@ -25,7 +31,6 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public CellColors Color
         {
             get => _color;
@@ -35,7 +40,6 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public bool IsPossible
         {
             get => _is_possible;
@@ -45,7 +49,6 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public Figure Figure
         {
             get => _figure;
@@ -55,13 +58,11 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public Position Position
         {
             get => _position;
             private set => _position = value;
         }
-        public Cell(CellColors color, bool active, Position position)
-            => (Color, Active, Position) = (color, active, position);
+        #endregion
     }
 }

@@ -7,16 +7,44 @@ using System;
 
 namespace ChessGame.Model
 {
+    /// <summary>
+    /// Игра шахматы
+    /// </summary>
     public class Game : NotifyPropertyChanged
     {
+        #region Поля
         private TimeSpan _white_remaining_seconds;
         private TimeSpan _black_remaining_seconds;
         private Board _board;
         private Timer _one_second_timer = new Timer(1000);
         private ChessViewModel _chess_vm;
-        public delegate void GameOverHandler(object sender, GameOverEventArgs e);
-        public event GameOverHandler GameOver;
-        public event Action EventsDetached;
+        #endregion
+
+        #region Конструкторы
+        public Game(DateTime save_date, ChessViewModel view_model, int white_total_seconds, int black_total_seconds)
+        {
+            _chess_vm = view_model;
+            SaveDate = save_date;
+            WhiteRemainingSeconds = new TimeSpan(0, 0, white_total_seconds);
+            BlackRemainingSeconds = new TimeSpan(0, 0, black_total_seconds);
+            Board board = new Board(this, view_model);
+            board.GameOver += BoardGameOver;
+            board.EventsDetached += BoardEventsDetached;
+            Board = board;
+            _one_second_timer.Elapsed += Timer_Elapsed;
+            _one_second_timer.Start();
+        }
+        public Game(DateTime save_date, ChessViewModel view_model, string restore_state_info)
+        {
+            _chess_vm = view_model;
+            SaveDate = save_date;
+            RestoreState(view_model, restore_state_info);
+            _one_second_timer.Elapsed += Timer_Elapsed;
+            _one_second_timer.Start();
+        }
+        #endregion
+
+        #region Свойства
         public TimeSpan WhiteRemainingSeconds
         {
             get => _white_remaining_seconds;
@@ -26,7 +54,6 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public TimeSpan BlackRemainingSeconds
         {
             get => _black_remaining_seconds;
@@ -36,50 +63,44 @@ namespace ChessGame.Model
                 OnPropertyChanged();
             }
         }
-
         public DateTime SaveDate { get; private set; }
-
         public Board Board
         {
             get => _board;
             private set => _board = value;
         }
+        #endregion
 
-        public Game(DateTime save_date, ChessViewModel view_model, int white_total_seconds, int black_total_seconds)
-        {
-            _chess_vm = view_model;
-            SaveDate = save_date;
-            WhiteRemainingSeconds = new TimeSpan(0,0, white_total_seconds);
-            BlackRemainingSeconds = new TimeSpan(0, 0, black_total_seconds);
-            Board board = new Board(this, view_model);
-            board.GameOver += BoardGameOver;
-            board.EventsDetached += BoardEventsDetached;
-            Board = board;
-            _one_second_timer.Elapsed += Timer_Elapsed;
-            _one_second_timer.Start();
-        }
+        #region События
+        public event Action<object, GameResult> GameOver;
+        public event Action EventsDetached;
+        #endregion
 
-        private void BoardEventsDetached()
+        #region Методы
+        /// <summary>
+        /// Обработчик события "Подписки на события обнулены"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        private void BoardEventsDetached(object sender)
         {
             _one_second_timer.Stop();
             EventsDetached?.Invoke();
         }
-
-        private void BoardGameOver(object sender, GameOverEventArgs e)
+        /// <summary>
+        /// Обработчик события "Игра окончена"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        /// <param name="game_result">Результат игры</param>
+        private void BoardGameOver(object sender, GameResult game_result)
         {
             _one_second_timer.Stop();
-            GameOver?.Invoke(this, e);
+            GameOver?.Invoke(this, game_result);
         }
-
-        public Game(DateTime save_date, ChessViewModel view_model, string restore_state_info)
-        {
-            _chess_vm = view_model;
-            SaveDate = save_date;
-            RestoreState(view_model, restore_state_info);
-            _one_second_timer.Elapsed += Timer_Elapsed;
-            _one_second_timer.Start();
-        }
-
+        /// <summary>
+        /// Восстановление состояния игры
+        /// </summary>
+        /// <param name="view_model">ViewModel</param>
+        /// <param name="restore_state_info">Информация о состоянии игры в строковом виде</param>
         private void RestoreState(ChessViewModel view_model, string restore_state_info)
         {
             string[] game_info = restore_state_info.Split('-');
@@ -92,16 +113,20 @@ namespace ChessGame.Model
             BlackRemainingSeconds = black_remaining_seconds;
             Board = restored_board;
         }
-
+        /// <summary>
+        /// Обработчик события "Тик таймера"
+        /// </summary>
+        /// <param name="sender">Источник события</param>
+        /// <param name="e">Параметры события</param>
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if(_board.CurrentMoveColor == FigureColor.White)
+            if (_board.CurrentMoveColor == FigureColor.White)
             {
                 WhiteRemainingSeconds = WhiteRemainingSeconds.Subtract(new TimeSpan(0, 0, 1));
                 if (WhiteRemainingSeconds.TotalSeconds <= 0)
                 {
                     _one_second_timer.Stop();
-                    GameOver?.Invoke(this, new GameOverEventArgs(GameResult.BlackWin));
+                    GameOver?.Invoke(this, GameResult.BlackWin);
                 }
             }
             else
@@ -110,14 +135,18 @@ namespace ChessGame.Model
                 if (BlackRemainingSeconds.TotalSeconds <= 0)
                 {
                     _one_second_timer.Stop();
-                    GameOver?.Invoke(this, new GameOverEventArgs(GameResult.WhiteWin));
+                    GameOver?.Invoke(this, GameResult.WhiteWin);
                 }
             }
         }
-
+        /// <summary>
+        /// Информация о игре в виде строки
+        /// </summary>
+        /// <returns>Строковое представление игры</returns>
         public override string ToString()
         {
             return $"{WhiteRemainingSeconds}-{BlackRemainingSeconds}-{_board}";
         }
+        #endregion
     }
 }
