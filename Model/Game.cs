@@ -17,13 +17,11 @@ namespace ChessGame.Model
         private TimeSpan _black_remaining_seconds;
         private Board _board;
         private Timer _one_second_timer = new Timer(1000);
-        private ChessViewModel _chess_vm;
         #endregion
 
         #region Конструкторы
         public Game(DateTime save_date, ChessViewModel view_model, int white_total_seconds, int black_total_seconds)
         {
-            _chess_vm = view_model;
             SaveDate = save_date;
             WhiteRemainingSeconds = new TimeSpan(0, 0, white_total_seconds);
             BlackRemainingSeconds = new TimeSpan(0, 0, black_total_seconds);
@@ -31,15 +29,14 @@ namespace ChessGame.Model
             board.GameOver += BoardGameOver;
             board.EventsDetached += BoardEventsDetached;
             Board = board;
-            _one_second_timer.Elapsed += Timer_Elapsed;
+            _one_second_timer.Elapsed += TimerElapsed;
             _one_second_timer.Start();
         }
         public Game(DateTime save_date, ChessViewModel view_model, string restore_state_info)
         {
-            _chess_vm = view_model;
             SaveDate = save_date;
             RestoreState(view_model, restore_state_info);
-            _one_second_timer.Elapsed += Timer_Elapsed;
+            _one_second_timer.Elapsed += TimerElapsed;
             _one_second_timer.Start();
         }
         #endregion
@@ -118,7 +115,7 @@ namespace ChessGame.Model
         /// </summary>
         /// <param name="sender">Источник события</param>
         /// <param name="e">Параметры события</param>
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (_board.CurrentMoveColor == FigureColor.White)
             {

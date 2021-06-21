@@ -32,7 +32,7 @@ namespace ChessGame.ViewModel
         private ICommand _upload_games_information;
         private ICommand _give_up_command;
         private ICommand _end_graw_command;
-        private ICommand _flip_sides_command;
+        private ICommand _swap_sides_command;
         private Button _current_clicked_button;
         #endregion
 
@@ -44,6 +44,7 @@ namespace ChessGame.ViewModel
         public event Action<object, bool, string> DataWorkCompleted;
         public event Action<object> GameSaved;
         public event Action<object, GameResult> GameOver;
+        public event Action<object, GameResult> RatingChanged;
         #endregion
 
         #region Свойства
@@ -91,82 +92,91 @@ namespace ChessGame.ViewModel
                 LoginVerified?.Invoke(this, false, "Данный пользователь уже аутентифицирован.");
                 return;
             }
-            using (SqlConnection connection = new SqlConnection(RelativePaths.DataBaseConnection))
+            Task.Run(() => 
             {
-                try
+                using (SqlConnection connection = new SqlConnection(RelativePaths.DataBaseConnection))
                 {
-                    connection.Open();
-                    if (connection.State != ConnectionState.Open)
+                    try
                     {
-                        LoginVerified?.Invoke(this, false, "Подключение к базе данных не удалось, попробуйте позже.");
-                    }
-                    else
-                    {
-                        SqlCommand select_command = new SqlCommand($"SELECT * FROM Players WHERE Players.[Login] = '{login}'", connection);
-                        using (SqlDataReader reader = select_command.ExecuteReader())
+                        connection.Open();
+                        if (connection.State != ConnectionState.Open)
                         {
-                            if (reader.HasRows)
+                            App.Current.Dispatcher.Invoke(() => LoginVerified?.Invoke(this, false, "Подключение к базе данных не удалось, попробуйте позже."));
+                        }
+                        else
+                        {
+                            SqlCommand select_command = new SqlCommand($"SELECT * FROM Players WHERE Players.[Login] = '{login}'", connection);
+                            using (SqlDataReader reader = select_command.ExecuteReader())
                             {
-                                reader.Read();
-                                string hash = reader.GetString(1);
-                                int rating = reader.GetInt32(2);
-                                if (BCrypt.Net.BCrypt.Verify(password, hash))
+                                if (reader.HasRows)
                                 {
-                                    if (_white_player == null) _white_player = new Player(rating, login);
-                                    else _black_player = new Player(rating, login);
-                                    LoginVerified?.Invoke(this, true, "Успешная аутентификация");
+                                    reader.Read();
+                                    string hash = reader.GetString(1);
+                                    int rating = reader.GetInt32(2);
+                                    if (BCrypt.Net.BCrypt.Verify(password, hash))
+                                    {
+                                        App.Current.Dispatcher.Invoke(() =>
+                                        {
+                                            if (_white_player == null) _white_player = new Player(this, rating, login, FigureColor.White);
+                                            else _black_player = new Player(this, rating, login, FigureColor.Black);
+                                            LoginVerified?.Invoke(this, true, "Успешная аутентификация");
+                                        });
+                                    }
+                                    else App.Current.Dispatcher.Invoke(() => LoginVerified?.Invoke(this, false, "Неверный пароль."));
                                 }
-                                else LoginVerified?.Invoke(this, false, "Неверный пароль.");
+                                else App.Current.Dispatcher.Invoke(() => LoginVerified?.Invoke(this, false, "Неверный логин."));
                             }
-                            else LoginVerified?.Invoke(this, false, "Неверный логин.");
                         }
                     }
+                    catch (Exception e)
+                    {
+                        App.Current.Dispatcher.Invoke(() => LoginVerified?.Invoke(this, false, "Ошибка при работа с базой данных, попробуйте позже."));
+                    }
                 }
-                catch (Exception e)
-                {
-                    LoginVerified?.Invoke(this, false, "Ошибка при работа с базой данных, попробуйте позже.");
-                }
-            }
+            });
         }));
         public ICommand RegistrationCommand => _registration_command ?? (_registration_command = new RelayCommand(obj =>
         {
             var (obj_one, obj_two) = obj as Tuple<object, object>;
             if (!(obj_one is string login) || !(obj_two is string password)) return;
-            using (SqlConnection connection = new SqlConnection(RelativePaths.DataBaseConnection))
+            Task.Run(() => 
             {
-                try
+                using (SqlConnection connection = new SqlConnection(RelativePaths.DataBaseConnection))
                 {
-                    connection.Open();
-                    if (connection.State != ConnectionState.Open)
+                    try
                     {
-                        RegistrationVerified?.Invoke(this, false, "Подключение к базе данных не удалось, попробуйте позже.");
-                    }
-                    else
-                    {
-                        SqlCommand select_command = new SqlCommand($"SELECT * FROM Players WHERE Players.[Login] = '{login}'", connection);
-                        using (SqlDataReader reader = select_command.ExecuteReader())
+                        connection.Open();
+                        if (connection.State != ConnectionState.Open)
                         {
-                            if (reader.HasRows) RegistrationVerified?.Invoke(this, false, "Такой логин уже существует.");
-                            else
+                            App.Current.Dispatcher.Invoke(() => RegistrationVerified?.Invoke(this, false, "Подключение к базе данных не удалось, попробуйте позже."));
+                        }
+                        else
+                        {
+                            SqlCommand select_command = new SqlCommand($"SELECT * FROM Players WHERE Players.[Login] = '{login}'", connection);
+                            using (SqlDataReader reader = select_command.ExecuteReader())
                             {
-                                reader.Close();
-                                string hash = BCrypt.Net.BCrypt.HashPassword(password);
-                                SqlCommand insert_command = new SqlCommand($"INSERT INTO Players([Login], [Password], [Rating]) VALUES ('{login}', '{hash}', '5000')", connection);
-                                int count_row = insert_command.ExecuteNonQuery();
-                                if (count_row == 0) throw new Exception();
+                                if (reader.HasRows) App.Current.Dispatcher.Invoke(() => RegistrationVerified?.Invoke(this, false, "Такой логин уже существует."));
                                 else
                                 {
-                                    RegistrationVerified?.Invoke(this, true, "Пользователь успешно зарегистрирован.");
+                                    reader.Close();
+                                    string hash = BCrypt.Net.BCrypt.HashPassword(password);
+                                    SqlCommand insert_command = new SqlCommand($"INSERT INTO Players([Login], [Password], [Rating]) VALUES ('{login}', '{hash}', '5000')", connection);
+                                    int count_row = insert_command.ExecuteNonQuery();
+                                    if (count_row == 0) throw new Exception();
+                                    else
+                                    {
+                                        App.Current.Dispatcher.Invoke(() => RegistrationVerified?.Invoke(this, true, "Пользователь успешно зарегистрирован."));
+                                    }
                                 }
                             }
                         }
                     }
+                    catch
+                    {
+                        App.Current.Dispatcher.Invoke(() => RegistrationVerified?.Invoke(this, false, "Ошибка при работа с базой данных, попробуйте позже."));
+                    }
                 }
-                catch
-                {
-                    RegistrationVerified?.Invoke(this, false, "Ошибка при работа с базой данных, попробуйте позже.");
-                }
-            }
+            });
         }));
         public ICommand SaveGameCommand => _save_game_command ?? (_save_game_command = new RelayCommand(obj => 
         {
@@ -346,8 +356,6 @@ namespace ChessGame.ViewModel
                             {
                                 App.Current.Dispatcher.Invoke(() => 
                                 {
-                                    losed_player.Rating -= 25;
-                                    winning_player.Rating += 25;
                                     GameOver?.Invoke(this, game_result); 
                                 });
                             }
@@ -366,7 +374,7 @@ namespace ChessGame.ViewModel
         {
             GameOver?.Invoke(this, GameResult.Draw);
         }));
-        public ICommand FlipSidesCommand => _flip_sides_command ?? (_flip_sides_command = new RelayCommand(obj => 
+        public ICommand SwapSidesCommand => _swap_sides_command ?? (_swap_sides_command = new RelayCommand(obj => 
         {
             Player tmp = WhitePlayer;
             WhitePlayer = BlackPlayer;
@@ -379,9 +387,10 @@ namespace ChessGame.ViewModel
         {
             Window window = new AuthorizationWindow(this);
             window.ShowDialog();
+            if(_white_player is null) App.Current.MainWindow.Close();
             window = new AuthorizationWindow(this);
             window.ShowDialog();
-            if (_white_player is null || _black_player is null) App.Current.MainWindow.Close();
+            if (_black_player is null) App.Current.MainWindow.Close();
         }
         #endregion
 
@@ -412,10 +421,11 @@ namespace ChessGame.ViewModel
             {
                 if (Game == null) return;
                 if (Game.SaveDate != DateTime.MinValue) RemoveGameFromDataBase(Game.SaveDate, _white_player.Login, _black_player.Login);
+                RatingChanged?.Invoke(this, game_result);
                 Game.GameOver -= GameGameOver;
                 Game.Board.PawnChangedResult -= BoardPawnChanged;
                 Game = null;
-                var main_window = App.Current.MainWindow;
+                Window main_window = App.Current.MainWindow;
                 GameResultWindow game_result_window = new GameResultWindow(game_result);
                 game_result_window.ShowDialog();
             }));

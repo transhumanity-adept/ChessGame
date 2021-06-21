@@ -34,7 +34,7 @@ namespace ChessGame.Model
         public CellColors Color
         {
             get => _color;
-            set
+            private set
             {
                 _color = value;
                 OnPropertyChanged();

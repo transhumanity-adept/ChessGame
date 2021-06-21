@@ -590,7 +590,7 @@
                                 <RowDefinition Height="100"/>
                                 <RowDefinition Height="100"/>
                             </Grid.RowDefinitions>
-                            <Button x:Name="_button_options_flip_sides" Visibility="Collapsed" Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonDefaultDarkTemplate}" Margin="10 25 10 25" Grid.Row="0" Content="ПОМЕНЯТЬСЯ СТОРОНАМИ" Command="{Binding FlipSidesCommand}"/>
+                            <Button x:Name="_button_options_flip_sides" Visibility="Collapsed" Style="{DynamicResource MenuButtonStyle}" Template="{StaticResource ButtonDefaultDarkTemplate}" Margin="10 25 10 25" Grid.Row="0" Content="ПОМЕНЯТЬСЯ СТОРОНАМИ" Command="{Binding SwapSidesCommand}"/>
                             <Grid x:Name="_grid_options_white_time" Grid.Row="1" Margin="15 0 25 0" Visibility="Collapsed">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
