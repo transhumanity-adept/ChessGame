@@ -7,13 +7,14 @@ namespace ChessGame.Model.Figures
     /// <summary>
     /// Шахматная фигура "Ладья"
     /// </summary>
-    class Rook : Figure
+    public class Rook : Figure
     {
         #region Конструкторы
-        public Rook(Position position, FigureColor color)
+        public Rook(Board board, Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteRook : RelativePaths.BlackRook, color)
         {
             MovementsState = MovementsState.Zero;
+            board.Castled += BoardCastled;
         }
         #endregion
 
@@ -22,6 +23,10 @@ namespace ChessGame.Model.Figures
         #endregion
 
         #region Методы
+        private void BoardCastled(object sender, King king, Position king_to_pos, Rook rook, Position rook_to_pos)
+        {
+            if (rook == this) Position = rook_to_pos;
+        }
         /// <summary>
         /// Ход фигуры
         /// </summary>

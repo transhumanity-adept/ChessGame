@@ -21,7 +21,7 @@ namespace ChessGame.Model
         #endregion
 
         #region Свойства
-        public Position Position { get => _position; set => _position = value; }
+        public Position Position { get => _position; protected set => _position = value; }
         public string ImagePath
         {
             get => _image_path;

@@ -15,10 +15,10 @@ namespace ChessGame.Model
         #endregion
 
         #region Контрукторы
-        public Player(ChessViewModel chess_vm, int rating, string login, FigureColor side_color)
+        public Player(Game game, int rating, string login, FigureColor side_color)
         {
             (Rating, Login, SideColor) = (rating, login, side_color);
-            chess_vm.RatingChanged += ChessVmRatingChanged;
+            game.RatingChanged += ChessGameRatingChanged;
         }
         #endregion
 
@@ -42,7 +42,7 @@ namespace ChessGame.Model
         /// </summary>
         /// <param name="sender">Источник события</param>
         /// <param name="game_result">Результат игры</param>
-        private void ChessVmRatingChanged(object sender, GameResult game_result)
+        private void ChessGameRatingChanged(object sender, GameResult game_result)
         {
             if (game_result == GameResult.WhiteWin)
                 Rating = SideColor == FigureColor.White ? Rating + 25 : Rating - 25;

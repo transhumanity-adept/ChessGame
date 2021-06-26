@@ -3,7 +3,7 @@
     /// <summary>
     /// Состояние передвижений фигуры
     /// </summary>
-    enum MovementsState
+    public enum MovementsState
     {
         Zero = 1,
         One,

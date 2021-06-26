@@ -6,7 +6,6 @@ using System.Linq;
 using ChessGame.Helpers;
 using ChessGame.Model.Figures;
 using ChessGame.Model.Figures.Helpers;
-using ChessGame.ViewModel;
 using ChessGame.Model.Helpers;
 using System.Threading.Tasks;
 
@@ -18,8 +17,8 @@ namespace ChessGame.Model
         private readonly Cell[,] _cells = new Cell[8, 8];
         private readonly Figure[,] _figures = new Figure[4, 8];
         private FigureColor _current_move_color;
-        private readonly ChessViewModel _chess_vm;
-        private readonly Game _game;
+        private readonly Game _chess_game;
+        private readonly ChessParty _party;
         #endregion
 
         #region Конструкторы
@@ -28,25 +27,25 @@ namespace ChessGame.Model
             BoardStartSetup();
             _figures.Cast<Figure>().ToList().ForEach(e => { if (e != null) { e.Moved += FigureMoved; e.Attacked += FigureAttacked; } });
         }
-        public Board(Game game, ChessViewModel view_model) : this()
+        public Board(ChessParty party, Game game) : this()
         {
-            game.GameOver += GameGameOver;
-            view_model.GameSaved += VMGameSaved;
-            view_model.GameOver += VMGameOver;
-            view_model.ClickedOnCell += ClickedOnCell;
-            view_model.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
-            _game = game;
-            _chess_vm = view_model;
+            party.GameOver += GameGameOver;
+            game.GameSaved += VMGameSaved;
+            game.GameOver += VMGameOver;
+            game.ClickedOnCell += ClickedOnCell;
+            game.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
+            _party = party;
+            _chess_game = game;
         }
-        public Board(Game game, ChessViewModel view_model, string restore_state_info)
+        public Board(ChessParty party, Game game, string restore_state_info)
         {
-            game.GameOver += GameGameOver;
-            view_model.GameSaved += VMGameSaved;
-            view_model.GameOver += VMGameOver;
-            view_model.ClickedOnCell += ClickedOnCell;
-            view_model.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
-            _game = game;
-            _chess_vm = view_model;
+            party.GameOver += GameGameOver;
+            game.GameSaved += VMGameSaved;
+            game.GameOver += VMGameOver;
+            game.ClickedOnCell += ClickedOnCell;
+            game.ResultOfPawnChangeObtained += ResultOfPawnChangeObtained;
+            _party = party;
+            _chess_game = game;
             RestoreState(restore_state_info);
         }
         #endregion
@@ -85,20 +84,48 @@ namespace ChessGame.Model
         /// Событие "Подписки на события обнулены"
         /// </summary>
         public event Action<object> EventsDetached;
+        /// <summary>
+        /// Событие "Клетка активирована"
+        /// </summary>
+        public event Action<object, Cell, bool> CellActivationChanged;
+        /// <summary>
+        /// Событие "Клетка стала возможным ходом"
+        /// </summary>
+        public event Action<object, Cell> CellBecamePossible;
+        /// <summary>
+        /// Событие "Возможные ходы сброшены"
+        /// </summary>
+        public event Action<object> CellsPossbleReset;
+        /// <summary>
+        /// Событие "Фигура на клетке изменена"
+        /// </summary>
+        public event Action<object, Cell, Figure> FigureOnCellChanged;
+        /// <summary>
+        /// Событие "Возможность взятия на проходе изменена"
+        /// </summary>
+        public event Action<object, Pawn, bool> EnPassantChanged;
+        /// <summary>
+        /// Событие "Возможность рокировки изменена"
+        /// </summary>
+        public event Action<object, King, bool> CastleChanged;
+        /// <summary>
+        /// Событие "Рокировка"
+        /// </summary>
+        public event Action<object, King, Position, Rook, Position> Castled; 
         #endregion
 
         #region Методы
         /// <summary>
-        /// Обработчик события "Игра окончена", источник Game
+        /// Обработчик события "Игра окончена", источник ChessParty
         /// </summary>
         /// <param name="sender">Источник события</param>
         /// <param name="game_result">Результат игры</param>
         private void GameGameOver(object sender, GameResult game_result)
         {
             CheckmateCache.Clear();
-            _chess_vm.ClickedOnCell -= ClickedOnCell;
-            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
-            _game.GameOver -= GameGameOver;
+            _chess_game.ClickedOnCell -= ClickedOnCell;
+            _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+            _party.GameOver -= GameGameOver;
         }
         /// <summary>
         /// Обработчик события "Игра окончена", источник VM
@@ -108,8 +135,8 @@ namespace ChessGame.Model
         private void VMGameOver(object sender, GameResult game_result)
         {
             CheckmateCache.Clear();
-            _chess_vm.ClickedOnCell -= ClickedOnCell;
-            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+            _chess_game.ClickedOnCell -= ClickedOnCell;
+            _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
             GameOver?.Invoke(this, game_result);
         }
         /// <summary>
@@ -119,8 +146,8 @@ namespace ChessGame.Model
         private void VMGameSaved(object sender)
         {
             CheckmateCache.Clear();
-            _chess_vm.ClickedOnCell -= ClickedOnCell;
-            _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+            _chess_game.ClickedOnCell -= ClickedOnCell;
+            _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
             EventsDetached?.Invoke(this);
         }
         /// <summary>
@@ -138,11 +165,11 @@ namespace ChessGame.Model
                 case ChangeResult.Queen: { figure = new Queen(figure_position, figure_color); break; }
                 case ChangeResult.Bishop: { figure = new Bishop(figure_position, figure_color); break; }
                 case ChangeResult.Knight: { figure = new Knight(figure_position, figure_color); break; }
-                case ChangeResult.Rook: { figure = new Rook(figure_position, figure_color); break; }
+                case ChangeResult.Rook: { figure = new Rook(this, figure_position, figure_color); break; }
             }
             figure.Moved += FigureMoved;
             figure.Attacked += FigureAttacked;
-            GetCellInPosition(figure_position).Figure = figure;
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(figure_position), figure);
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
@@ -164,7 +191,7 @@ namespace ChessGame.Model
             Cell active_cell = _cells.Cast<Cell>().FirstOrDefault(c => c.Active);
             if (active_cell is null)
             {
-                clicked_cell.Active = true;
+                CellActivationChanged?.Invoke(this, clicked_cell, true);
                 if (clicked_cell.Figure != null)
                 {
                     if (clicked_cell.Figure.Color != CurrentMoveColor) return;
@@ -177,19 +204,19 @@ namespace ChessGame.Model
             {
                 if (clicked_cell == active_cell)
                 {
-                    clicked_cell.Active = false;
+                    CellActivationChanged?.Invoke(this, clicked_cell, false);
                     ResetPossibleMoves();
                 }
                 else
                 {
-                    active_cell.Active = false;
+                    CellActivationChanged?.Invoke(this, active_cell, false);
                     ResetPossibleMoves();
 
                     if (clicked_cell.Figure != null)
                     {
                         if (active_cell.Figure == null)
                         {
-                            clicked_cell.Active = true;
+                            CellActivationChanged?.Invoke(this, clicked_cell, true);
                             if (clicked_cell.Figure.Color != CurrentMoveColor) return;
                             List<Position> possible_moves = CheckmateCache.CachedMoves.Count == 0 ? 
                                 GetFiltredPossiblePositions(clicked_cell.Figure) : 
@@ -209,7 +236,7 @@ namespace ChessGame.Model
                             else
                             {
                                 ResetPossibleMoves();
-                                clicked_cell.Active = true;
+                                CellActivationChanged?.Invoke(this, clicked_cell, true);
                                 if (clicked_cell.Figure.Color != CurrentMoveColor) return;
                                 List<Position> possible_moves_clicked = CheckmateCache.CachedMoves.Count == 0 ?
                                 GetFiltredPossiblePositions(clicked_cell.Figure) :
@@ -222,7 +249,7 @@ namespace ChessGame.Model
                     {
                         if (active_cell.Figure == null)
                         {
-                            clicked_cell.Active = true;
+                            CellActivationChanged?.Invoke(this, clicked_cell, true);
                         }
                         else
                         {
@@ -231,7 +258,7 @@ namespace ChessGame.Model
                                 CheckmateCache.CachedMoves.Find(p => p.figure == active_cell.Figure).possible_moves;
                             if (!(possible_moves.Contains(clicked_cell.Position)))
                             {
-                                clicked_cell.Active = true;
+                                CellActivationChanged?.Invoke(this, clicked_cell, true);
                             }
                             else
                             {
@@ -301,12 +328,11 @@ namespace ChessGame.Model
             if (!(sender is King)) return;
             King king = (King)sender;
             Rook rook = GetCellInPosition(rook_position).Figure as Rook;
-            rook.Position = rook_movable_position;
-            GetCellInPosition(king_position).Figure = null;
-            GetCellInPosition(king_movable_position).Figure = king;
-            GetCellInPosition(rook_position).Figure = null;
-            GetCellInPosition(rook_movable_position).Figure = rook;
-            king.HasCastle = false;
+            Castled?.Invoke(this,king, king_movable_position, rook, rook_movable_position);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(king_position), null);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(king_movable_position), king);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(rook_position), null);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(rook_movable_position), rook);
             ReverseCurrentMoveColor();
             Checkmate();
         }
@@ -322,9 +348,9 @@ namespace ChessGame.Model
             if (!(sender is Pawn)) return;
             Pawn attacking_figure = (Pawn)sender;
             Figure attacked_figure = GetCellInPosition(position_figure_begin_attacked).Figure;
-            GetCellInPosition(end_passant_position).Figure = attacking_figure;
-            GetCellInPosition(attacking_figure_position).Figure = null;
-            GetCellInPosition(position_figure_begin_attacked).Figure = null;
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(end_passant_position), attacking_figure);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(attacking_figure_position), null);
+            FigureOnCellChanged?.Invoke(this, GetCellInPosition(position_figure_begin_attacked), null);
             for (int i = 0; i < _figures.GetLength(0); i++)
             {
                 for (int j = 0; j < _figures.GetLength(1); j++)
@@ -332,7 +358,7 @@ namespace ChessGame.Model
                     if (_figures[i, j] == attacked_figure) _figures[i, j] = null;
                 }
             }
-            attacking_figure.HasEnPassant = false;
+            EnPassantChanged?.Invoke(this, attacking_figure, false);
             CountMoves++;
             ReverseCurrentMoveColor();
             Checkmate();
@@ -356,8 +382,8 @@ namespace ChessGame.Model
                     if (_figures[i,j] != null && _figures[i,j] != current_figure && _figures[i, j].Position == attacked_to) _figures[i, j] = null;
                 }
             }
-            from.Figure = null;
-            to.Figure = current_figure;
+            FigureOnCellChanged?.Invoke(this, from, null);
+            FigureOnCellChanged?.Invoke(this, to, current_figure);
             CountMoves++;
             if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
             {
@@ -377,8 +403,8 @@ namespace ChessGame.Model
             Figure current_figure = (Figure)sender;
             Cell from = GetCellInPosition(moved_from);
             Cell to = GetCellInPosition(moved_to);
-            from.Figure = null;
-            to.Figure = current_figure;
+            FigureOnCellChanged?.Invoke(this, from, null);
+            FigureOnCellChanged?.Invoke(this, to, current_figure);
             CountMoves++;
             if (current_figure.Position.X != (current_figure.Color == FigureColor.White ? 7 : 0) || !(current_figure is Pawn))
             {
@@ -473,8 +499,8 @@ namespace ChessGame.Model
                     if (white_possible_moves.TrueForAll(e => e.possible_moves.Count == 0))
                     {
                         CheckmateCache.Clear();
-                        _chess_vm.ClickedOnCell -= ClickedOnCell;
-                        _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+                        _chess_game.ClickedOnCell -= ClickedOnCell;
+                        _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
                         GameOver.Invoke(this, GameResult.BlackWin);
                         return;
                     }
@@ -484,8 +510,8 @@ namespace ChessGame.Model
                     if (white_possible_moves.TrueForAll(e => e.possible_moves.Count == 0)) 
                     {
                         CheckmateCache.Clear();
-                        _chess_vm.ClickedOnCell -= ClickedOnCell;
-                        _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+                        _chess_game.ClickedOnCell -= ClickedOnCell;
+                        _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
                         GameOver.Invoke(this, GameResult.Draw);
                     }
                 }
@@ -559,8 +585,8 @@ namespace ChessGame.Model
                     if (black_possible_moves.TrueForAll(e => e.possible_moves.Count == 0))
                     {
                         CheckmateCache.Clear();
-                        _chess_vm.ClickedOnCell -= ClickedOnCell;
-                        _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+                        _chess_game.ClickedOnCell -= ClickedOnCell;
+                        _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
                         GameOver.Invoke(this, GameResult.WhiteWin);
                     }
                 }
@@ -569,8 +595,8 @@ namespace ChessGame.Model
                     if (black_possible_moves.TrueForAll(e => e.possible_moves.Count == 0)) 
                     {
                         CheckmateCache.Clear();
-                        _chess_vm.ClickedOnCell -= ClickedOnCell;
-                        _chess_vm.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
+                        _chess_game.ClickedOnCell -= ClickedOnCell;
+                        _chess_game.ResultOfPawnChangeObtained -= ResultOfPawnChangeObtained;
                         GameOver.Invoke(this, GameResult.Draw);
                     }
                 }
@@ -667,49 +693,49 @@ namespace ChessGame.Model
                 for (int j = 0; j < _cells.GetLength(1); j++)
                 {
                     CellColors color = (i + j) % 2 == 0 ? CellColors.White : CellColors.Black;
-                    _cells[i, j] = new Cell(color, false, new Position(7 - i, j));
+                    _cells[i, j] = new Cell(this, color, false, new Position(7 - i, j));
                 }
             }
             for (int i = 0; i < _figures.GetLength(1); i++)
             {
-                Pawn black_pawn = new Pawn(new Position(6, i), FigureColor.Black);
-                Pawn white_pawn = new Pawn(new Position(1, i), FigureColor.White);
+                Pawn black_pawn = new Pawn(this, new Position(6, i), FigureColor.Black);
+                Pawn white_pawn = new Pawn(this, new Position(1, i), FigureColor.White);
                 black_pawn.EnPassanted += PawnEnPassanted;
                 white_pawn.EnPassanted += PawnEnPassanted;
                 black_pawn.Changed += PawnChanged;
                 white_pawn.Changed += PawnChanged;
                 _figures[1, i] = black_pawn;
                 _figures[2, i] = white_pawn;
-                _cells[1, i].Figure = black_pawn;
-                _cells[6, i].Figure = white_pawn;
+                FigureOnCellChanged?.Invoke(this, _cells[1, i], black_pawn);
+                FigureOnCellChanged?.Invoke(this, _cells[6, i], white_pawn);
             }
-            King black_king = new King(new Position(7, 4), FigureColor.Black);
-            King white_king = new King(new Position(0, 4), FigureColor.White);
+            King black_king = new King(this, new Position(7, 4), FigureColor.Black);
+            King white_king = new King(this, new Position(0, 4), FigureColor.White);
             black_king.ToCastled += KingToCastled;
             white_king.ToCastled += KingToCastled;
 
-            _figures[0, 0] = new Rook(new Position(7, 0), FigureColor.Black);
+            _figures[0, 0] = new Rook(this, new Position(7, 0), FigureColor.Black);
             _figures[0, 1] = new Knight(new Position(7, 1), FigureColor.Black);
             _figures[0, 2] = new Bishop(new Position(7, 2), FigureColor.Black);
             _figures[0, 3] = new Queen(new Position(7, 3), FigureColor.Black);
             _figures[0, 4] = black_king;
             _figures[0, 5] = new Bishop(new Position(7, 5), FigureColor.Black);
             _figures[0, 6] = new Knight(new Position(7, 6), FigureColor.Black);
-            _figures[0, 7] = new Rook(new Position(7, 7), FigureColor.Black);
+            _figures[0, 7] = new Rook(this, new Position(7, 7), FigureColor.Black);
 
-            _figures[3, 0] = new Rook(new Position(0, 0), FigureColor.White);
+            _figures[3, 0] = new Rook(this, new Position(0, 0), FigureColor.White);
             _figures[3, 1] = new Knight(new Position(0, 1), FigureColor.White);
             _figures[3, 2] = new Bishop(new Position(0, 2), FigureColor.White);
             _figures[3, 3] = new Queen(new Position(0, 3), FigureColor.White);
             _figures[3, 4] = white_king;
             _figures[3, 5] = new Bishop(new Position(0, 5), FigureColor.White);
             _figures[3, 6] = new Knight(new Position(0, 6), FigureColor.White);
-            _figures[3, 7] = new Rook(new Position(0, 7), FigureColor.White);
+            _figures[3, 7] = new Rook(this, new Position(0, 7), FigureColor.White);
 
             for (int i = 0; i < _figures.GetLength(1); i++)
             {
-                _cells[0, i].Figure = _figures[0, i];
-                _cells[7, i].Figure = _figures[3, i];
+                FigureOnCellChanged?.Invoke(this, _cells[0, i], _figures[0, i]);
+                FigureOnCellChanged?.Invoke(this, _cells[7, i], _figures[3, i]);
             }
         }
         /// <summary>
@@ -723,7 +749,7 @@ namespace ChessGame.Model
                 for (int j = 0; j < _cells.GetLength(1); j++)
                 {
                     CellColors color = (i + j) % 2 == 0 ? CellColors.White : CellColors.Black;
-                    _cells[i, j] = new Cell(color, false, new Position(7 - i, j));
+                    _cells[i, j] = new Cell(this, color, false, new Position(7 - i, j));
                 }
             }
             string[] info = restore_state_info.Split('*');
@@ -746,10 +772,10 @@ namespace ChessGame.Model
                     {
                         case "Rook":
                             {
-                                Rook figure = new Rook(figure_pos, figure_color);
+                                Rook figure = new Rook(this, figure_pos, figure_color);
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                         case "Queen":
@@ -757,7 +783,7 @@ namespace ChessGame.Model
                                 Queen figure = new Queen(figure_pos, figure_color);
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                         case "Bishop":
@@ -765,7 +791,7 @@ namespace ChessGame.Model
                                 Bishop figure = new Bishop(figure_pos, figure_color);
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                         case "Knight":
@@ -773,7 +799,7 @@ namespace ChessGame.Model
                                 Knight figure = new Knight(figure_pos, figure_color);
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                         case "Pawn":
@@ -781,23 +807,23 @@ namespace ChessGame.Model
                                 MovementsState movement_state = (MovementsState)Enum.Parse(typeof(MovementsState), figure_info[3]);
                                 bool has_en_passant = bool.Parse(figure_info[4]);
                                 int en_passant_number_move = int.Parse(figure_info[5]);
-                                Pawn figure = new Pawn(figure_pos, figure_color, movement_state, has_en_passant, en_passant_number_move);
+                                Pawn figure = new Pawn(this, figure_pos, figure_color, movement_state, has_en_passant, en_passant_number_move);
                                 figure.EnPassanted += PawnEnPassanted;
                                 figure.Changed += PawnChanged;
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                         case "King":
                             {
                                 MovementsState movement_state = (MovementsState)Enum.Parse(typeof(MovementsState), figure_info[3]);
                                 bool has_castle = bool.Parse(figure_info[4]);
-                                King figure = new King(figure_pos, figure_color, movement_state, has_castle);
+                                King figure = new King(this, figure_pos, figure_color, movement_state, has_castle);
                                 figure.ToCastled += KingToCastled;
                                 _figures[figure_row_index, figure_column_index] = figure;
                                 Cell cell = GetCellInPosition(figure_pos);
-                                cell.Figure = figure;
+                                FigureOnCellChanged?.Invoke(this, cell, figure);
                                 break;
                             }
                     }
@@ -816,7 +842,7 @@ namespace ChessGame.Model
                 Cell cell = GetCellInPosition(position);
                 if(cell != null)
                 {
-                    cell.IsPossible = true;
+                    CellBecamePossible?.Invoke(this, cell);
                 }
             }
         }
@@ -825,13 +851,7 @@ namespace ChessGame.Model
         /// </summary>
         private void ResetPossibleMoves()
         {
-            for (int i = 0; i < _cells.GetLength(0); i++)
-            {
-                for (int j = 0; j < _cells.GetLength(1); j++)
-                {
-                    _cells[i, j].IsPossible = false;
-                }
-            }
+            CellsPossbleReset?.Invoke(this);
         }
         /// <summary>
         /// Получить клетку доски в позиции
@@ -920,12 +940,12 @@ namespace ChessGame.Model
                         if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_left.Position.X + 1, en_passant_pawn_left.Position.Y));
-                            current_pawn_figure.HasEnPassant = true;
+                            EnPassantChanged?.Invoke(this, current_pawn_figure, true);
                         }
                         if(en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_right.Position.X + 1, en_passant_pawn_right.Position.Y));
-                            current_pawn_figure.HasEnPassant = true;
+                            EnPassantChanged?.Invoke(this, current_pawn_figure, true);
                         }
                     }
                     #endregion
@@ -967,12 +987,12 @@ namespace ChessGame.Model
                         if (en_passant_pawn_left != null && en_passant_pawn_left.MovementsState == MovementsState.One && en_passant_pawn_left.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_left.Position.X - 1, en_passant_pawn_left.Position.Y));
-                            current_pawn_figure.HasEnPassant = true;
+                            EnPassantChanged?.Invoke(this, current_pawn_figure, true);
                         }
                         else if (en_passant_pawn_right != null && en_passant_pawn_right.MovementsState == MovementsState.One && en_passant_pawn_right.EnPassantNumberMove == CountMoves - 1)
                         {
                             tmp_pos.Add(new Position(en_passant_pawn_right.Position.X - 1, en_passant_pawn_right.Position.Y));
-                            current_pawn_figure.HasEnPassant = true;
+                            EnPassantChanged?.Invoke(this, current_pawn_figure, true);
                         }
                     }
                     #endregion
@@ -1013,7 +1033,7 @@ namespace ChessGame.Model
                             GetCellInPosition(new Position(figure_position.X, 3)).Figure == null)
                         {
                             tmp_pos.Add(new Position(figure_position.X, 2));
-                            (figure as King).HasCastle = true;
+                            CastleChanged?.Invoke(this, king, true);
                         }
                     }
                     if (right_rook != null && right_rook.MovementsState == MovementsState.Zero)
@@ -1022,7 +1042,7 @@ namespace ChessGame.Model
                             GetCellInPosition(new Position(figure_position.X, 6)).Figure == null)
                         {
                             tmp_pos.Add(new Position(figure_position.X, 6));
-                            (figure as King).HasCastle = true;
+                            CastleChanged?.Invoke(this, king, true);
                         }
                     }
                 }

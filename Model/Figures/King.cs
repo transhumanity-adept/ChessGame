@@ -8,16 +8,17 @@ namespace ChessGame.Model.Figures
     /// <summary>
     /// Шахматная фигура "Король"
     /// </summary>
-    class King : Figure
+    public class King : Figure
     {
         #region Конструкторы
-        public King(Position position, FigureColor color)
+        public King(Board board, Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteKing : RelativePaths.BlackKing, color) 
         {
             MovementsState = MovementsState.Zero;
+            board.CastleChanged += BoardCastleChanged;
+            board.Castled += BoardCastled;
         }
-
-        public King(Position position, FigureColor color, MovementsState movement_state, bool has_castle)
+        public King(Board board, Position position, FigureColor color, MovementsState movement_state, bool has_castle)
             : base(position, color == FigureColor.White ? RelativePaths.WhiteKing : RelativePaths.BlackKing, color)
         {
             MovementsState = movement_state;
@@ -27,7 +28,7 @@ namespace ChessGame.Model.Figures
 
         #region Свойства
         public MovementsState MovementsState { get; private set; }
-        public bool HasCastle { get; set; }
+        public bool HasCastle { get; private set; }
         #endregion
 
         #region События
@@ -81,6 +82,14 @@ namespace ChessGame.Model.Figures
             try { result.Add(new Position(_position.X + 1, _position.Y - 1)); } catch { }
             try { result.Add(new Position(_position.X + 1, _position.Y + 1)); } catch { }
             return result;
+        }
+        private void BoardCastled(object sender, King king, Position king_to_pos, Rook rook, Position rook_to_pos)
+        {
+            if (king == this) HasCastle = false;
+        }
+        private void BoardCastleChanged(object sender, King king, bool castle)
+        {
+            if (king == this) HasCastle = castle;
         }
         /// <summary>
         /// Информация о фигуре в виде строки

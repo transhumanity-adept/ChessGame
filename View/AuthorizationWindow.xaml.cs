@@ -1,8 +1,9 @@
-﻿using ChessGame.ViewModel;
+﻿using ChessGame.Model;
 using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Linq;
 
 namespace ChessGame.View
 {
@@ -15,7 +16,7 @@ namespace ChessGame.View
         private double _warning_animation_width;
         private readonly SolidColorBrush _error_brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#de0000"));
         private readonly SolidColorBrush _success_brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#86c93a"));
-        private readonly ChessViewModel _chess_vm;
+        private readonly Game _chess_game;
         #endregion
 
         #region Конструкторы
@@ -23,12 +24,12 @@ namespace ChessGame.View
         {
             InitializeComponent();
         }
-        public AuthorizationWindow(ChessViewModel chess_vm) : this()
+        public AuthorizationWindow(Game chess_vm) : this()
         {
             if (chess_vm is null) Close();
             chess_vm.LoginVerified += LoginVerified;
             chess_vm.RegistrationVerified += RegistrationVerified;
-            _chess_vm = chess_vm;
+            _chess_game = chess_vm;
         }
         #endregion
 
@@ -97,7 +98,7 @@ namespace ChessGame.View
                     ShowNotify(_error_brush, "Длина логина и пароля должна быть не менее 4 символов.");
                 }
             }
-            else _chess_vm.LoginCommand.Execute(new Tuple<object, object>(_text_box_login.Text.Trim(), _password_box.Password.Trim()));
+            else _chess_game.LoginCommand.Execute(new Tuple<object, object>(_text_box_login.Text.Trim(), _password_box.Password.Trim()));
         }
         /// <summary>
         /// Обработчик события "Клик по кнопке "Регистрация""
@@ -120,7 +121,14 @@ namespace ChessGame.View
                     ShowNotify(_error_brush, "Длина логина и пароля должна быть не менее 4 символов.");
                 }
             }
-            else _chess_vm.RegistrationCommand.Execute(new Tuple<object, object>(_text_box_login.Text.Trim(), _password_box.Password.Trim()));
+            else if (_text_box_login.Text.Trim().ToList().Any(c => !char.IsLetterOrDigit(c)) || _password_box.Password.Trim().ToList().Any(c => !char.IsLetterOrDigit(c)))
+            {
+                if (_border_notify.Visibility != Visibility.Visible)
+                {
+                    ShowNotify(_error_brush, "Запрещено использование специальных символов.");
+                }
+            }
+            else _chess_game.RegistrationCommand.Execute(new Tuple<object, object>(_text_box_login.Text.Trim(), _password_box.Password.Trim()));
         }
         /// <summary>
         /// Обработчик события "Фокус ввода изменился"

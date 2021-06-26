@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:chess ="clr-namespace:ChessGame" 
         xmlns:chess_vm_converters ="clr-namespace:ChessGame.ViewModel.Converters" 
-        xmlns:chess_vm ="clr-namespace:ChessGame.ViewModel"
+        xmlns:chess_model ="clr-namespace:ChessGame.Model"
         mc:Ignorable="d"        
         Title="MainWindow" Height="750" Width="1000"
-        d:DataContext="{d:DesignInstance chess_vm:ChessViewModel, IsDesignTimeCreatable=True}"
+        d:DataContext="{d:DesignInstance chess_model:Game, IsDesignTimeCreatable=True}"
         SnapsToDevicePixels="True"
         MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip" Background="#312E2B" SizeChanged="WindowSizeChanged" Loaded="WindowLoaded">
     <Window.DataContext>
-        <chess_vm:ChessViewModel/>
+        <chess_model:Game/>
     </Window.DataContext>
     <Window.Resources>
         <chess_vm_converters:CellColorConverter x:Key="ColorConverter"/>
@@ -73,10 +73,10 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -114,10 +114,10 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -191,15 +191,15 @@
                     </Setter>
                     <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="True">
                     <Setter Property="IsEnabled" Value="False"/>
                     <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.Game, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
+                <DataTrigger Binding="{Binding DataContext.Party, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource NullConverter}}" Value="False">
                     <Setter Property="IsEnabled" Value="True"/>
                     <Setter TargetName="_border_give_up_svg" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
+                <DataTrigger Binding="{Binding Party.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
                     <Setter TargetName="PathGiveUpSVG" Property="Fill" Value="#21201E"/>
                 </DataTrigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -243,7 +243,7 @@
                             <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="true">
+                            <DataTrigger Binding="{Binding Party.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="true">
                                 <Setter Property="Foreground" Value="#88ff00"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -265,7 +265,7 @@
                             <ContentPresenter HorizontalAlignment="Center" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Game.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
+                            <DataTrigger Binding="{Binding Party.Board.CurrentMoveColor, Converter={StaticResource IsWhiteMoveConverter}}" Value="false">
                                 <Setter Property="Foreground" Value="#88ff00"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -536,7 +536,7 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="1">
-                        <Label Grid.Column="3" Style="{DynamicResource LabelBlackTimeStyle}" Content="{Binding Game.BlackRemainingSeconds}"/>
+                        <Label Grid.Column="3" Style="{DynamicResource LabelBlackTimeStyle}" Content="{Binding Party.BlackRemainingSeconds}"/>
                     </Grid>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -556,7 +556,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
-                    <Label Name="black_time" Grid.Column="3" Content="{Binding Game.WhiteRemainingSeconds}" Style="{DynamicResource LabelWhiteTimeStyle}"/>
+                    <Label Name="black_time" Grid.Column="3" Content="{Binding Party.WhiteRemainingSeconds}" Style="{DynamicResource LabelWhiteTimeStyle}"/>
                 </Grid>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -696,7 +696,7 @@
                             </Border>
                         </Grid>
                     </Border>
-                    <ItemsControl ItemsSource="{Binding Game.Board}"
+                    <ItemsControl ItemsSource="{Binding Party.Board}"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center" Grid.Column="1" x:Name="_items_control_board">
                         <ItemsControl.ItemTemplate>

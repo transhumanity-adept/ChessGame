@@ -8,15 +8,22 @@ namespace ChessGame.Model.Figures
     /// <summary>
     /// Шахматная фигура "Пешка"
     /// </summary>
-    class Pawn : Figure
+    public class Pawn : Figure
     {
         #region Конструкторы
-        public Pawn(Position position, FigureColor color)
+        public Pawn(Board board, Position position, FigureColor color)
             : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
         {
             MovementsState = MovementsState.Zero;
+            board.EnPassantChanged += BoardEnPassantChanged;
         }
-        public Pawn(Position position, FigureColor color, MovementsState movement_state, bool has_en_passant, int en_passant_number_move)
+
+        private void BoardEnPassantChanged(object sender, Pawn pawn, bool en_passant)
+        {
+            if (pawn == this) HasEnPassant = en_passant;
+        }
+
+        public Pawn(Board board, Position position, FigureColor color, MovementsState movement_state, bool has_en_passant, int en_passant_number_move)
             : base(position, color == FigureColor.White ? RelativePaths.WhitePawn : RelativePaths.BlackPawn, color)
         {
             MovementsState = movement_state;
@@ -27,8 +34,8 @@ namespace ChessGame.Model.Figures
 
         #region Свойства
         public MovementsState MovementsState { get; private set; }
-        public bool HasEnPassant { get; set; }
-        public int EnPassantNumberMove { get; set; }
+        public bool HasEnPassant { get; private set; }
+        public int EnPassantNumberMove { get; private set; }
         #endregion
 
         #region События

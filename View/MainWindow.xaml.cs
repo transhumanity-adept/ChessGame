@@ -1,4 +1,4 @@
-﻿using ChessGame.ViewModel;
+﻿using ChessGame.Model;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -45,8 +45,8 @@ namespace ChessGame
         /// <param name="e">Параметры события</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            if (!(DataContext is ChessViewModel)) return;
-            ((ChessViewModel)DataContext).DataWorkCompleted += ChessVMDataWorkCompleted;
+            if (!(DataContext is Game)) return;
+            ((Game)DataContext).DataWorkCompleted += ChessVMDataWorkCompleted;
         }
         /// <summary>
         /// Показать главное меню
@@ -307,7 +307,7 @@ namespace ChessGame
         {
             if (_border_upload_game.Visibility != Visibility.Visible)
             {
-                ((ChessViewModel)DataContext).UploadGamesInformation.Execute(null);
+                ((Game)DataContext).UploadGamesInformation.Execute(null);
                 ShowUpload();
             }
             else HideUpload();
@@ -386,7 +386,7 @@ namespace ChessGame
         {
             if (_list_box_uploaded_games.SelectedItem is null) return;
             HideUpload();
-            ((ChessViewModel)DataContext).UploadGame.Execute(_list_box_uploaded_games.SelectedItem.ToString());
+            ((Game)DataContext).UploadGame.Execute(_list_box_uploaded_games.SelectedItem.ToString());
             DoubleAnimation show_game_board = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromSeconds(1.5)));
             _items_control_board.BeginAnimation(OpacityProperty, show_game_board);
         }

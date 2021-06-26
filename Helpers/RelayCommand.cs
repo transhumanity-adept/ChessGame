@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace ChessGame.ViewModel
+namespace ChessGame.Helpers
 {
     /// <summary>
     /// Класс представляющий команду
